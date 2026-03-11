@@ -1,342 +1,166 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Fechas para el selector
-const dates = [
-  { day: 'Lun', date: '14' },
-  { day: 'Mar', date: '15', active: true },
-  { day: 'Mié', date: '16' },
-  { day: 'Jue', date: '17' },
-  { day: 'Vie', date: '18' },
-];
-
-export default function NotesScreen({ navigation }) {
-  // Estados para los campos de la nota
-  const [reason, setReason] = useState('');
-  const [temperature, setTemperature] = useState('');
-  const [pressure, setPressure] = useState('');
-  const [weight, setWeight] = useState('');
-  const [diagnosis, setDiagnosis] = useState('');
-  const [treatment, setTreatment] = useState('');
-
-  const handleSave = () => {
-    console.log("Guardando nota...");
-    navigation.goBack();
-  };
+export default function NotasPaciente({ navigation }) {
+  const [notas, setNotas] = useState('');
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      {/* Header */}
+      <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color="#374151" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notas</Text>
-        <TouchableOpacity style={styles.headerIcon}>
-          <Ionicons name="checkmark" size={24} color="#2563EB" onPress={handleSave} />
+        <Text style={styles.headerTitle}>Ficha del Paciente</Text>
+        <TouchableOpacity style={styles.moreBtn}>
+          <Ionicons name="ellipsis-vertical" size={20} color="#374151" />
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-          {/* Tarjeta del Paciente Resumida */}
-          <View style={styles.patientSummaryCard}>
-            <View style={styles.avatarMini}>
-              <Text style={styles.avatarMiniText}>MG</Text>
-            </View>
-            <View style={styles.patientSummaryInfo}>
-              <Text style={styles.patientSummaryName}>María González</Text>
-              <Text style={styles.patientSummaryDesc}>Consulta General - 09:30 AM</Text>
-            </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Patient summary */}
+        <View style={styles.patientCard}>
+          <View style={styles.patientAvatar}>
+            <Ionicons name="person" size={28} color="#9CA3AF" />
           </View>
-
-          {/* Selector de Fechas */}
-          <View style={styles.dateSelectorContainer}>
-            {dates.map((item, index) => (
-              <TouchableOpacity 
-                key={index} 
-                style={[styles.dateBox, item.active && styles.dateBoxActive]}
-              >
-                <Text style={[styles.dateDay, item.active && styles.dateTextActive]}>{item.day}</Text>
-                <Text style={[styles.dateNumber, item.active && styles.dateTextActive]}>{item.date}</Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.patientInfo}>
+            <Text style={styles.patientName}>María González</Text>
+            <Text style={styles.patientId}>ID: 001234</Text>
+            <Text style={styles.statusBadge}>Activo</Text>
           </View>
-
-          {/* Sección: Motivo de Consulta */}
-          <Text style={styles.sectionTitle}>Motivo de Consulta</Text>
-          <TextInput
-            style={styles.textArea}
-            placeholder="Describa los síntomas del paciente..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            value={reason}
-            onChangeText={setReason}
-          />
-
-          {/* Sección: Signos Vitales */}
-          <Text style={styles.sectionTitle}>Signos Vitales</Text>
-          <View style={styles.vitalSignsRow}>
-            
-            <View style={styles.vitalSignBox}>
-              <View style={styles.vitalSignHeader}>
-                <Ionicons name="thermometer-outline" size={16} color="#EF4444" />
-                <Text style={styles.vitalSignLabel}>Temp.</Text>
-              </View>
-              <View style={styles.vitalSignInputContainer}>
-                <TextInput
-                  style={styles.vitalSignInput}
-                  placeholder="36.5"
-                  keyboardType="numeric"
-                  value={temperature}
-                  onChangeText={setTemperature}
-                />
-                <Text style={styles.vitalSignUnit}>°C</Text>
-              </View>
-            </View>
-
-            <View style={styles.vitalSignBox}>
-              <View style={styles.vitalSignHeader}>
-                <Ionicons name="heart-outline" size={16} color="#EF4444" />
-                <Text style={styles.vitalSignLabel}>Presión</Text>
-              </View>
-              <View style={styles.vitalSignInputContainer}>
-                <TextInput
-                  style={styles.vitalSignInput}
-                  placeholder="120/80"
-                  keyboardType="numbers-and-punctuation"
-                  value={pressure}
-                  onChangeText={setPressure}
-                />
-              </View>
-            </View>
-
-            <View style={styles.vitalSignBox}>
-              <View style={styles.vitalSignHeader}>
-                <Ionicons name="scale-outline" size={16} color="#3B82F6" />
-                <Text style={styles.vitalSignLabel}>Peso</Text>
-              </View>
-              <View style={styles.vitalSignInputContainer}>
-                <TextInput
-                  style={styles.vitalSignInput}
-                  placeholder="70"
-                  keyboardType="numeric"
-                  value={weight}
-                  onChangeText={setWeight}
-                />
-                <Text style={styles.vitalSignUnit}>kg</Text>
-              </View>
-            </View>
-
+          <View style={styles.patientMeta}>
+            <Text style={styles.ageText}>42 años</Text>
+            <Text style={styles.generoText}>Femenino</Text>
           </View>
+        </View>
 
-          {/* Sección: Diagnóstico */}
-          <Text style={styles.sectionTitle}>Diagnóstico</Text>
-          <TextInput
-            style={styles.inputSingleLine}
-            placeholder="Diagnóstico principal..."
-            placeholderTextColor="#9CA3AF"
-            value={diagnosis}
-            onChangeText={setDiagnosis}
-          />
+        {/* Stats */}
+        <View style={styles.statsRow}>
+          {[['Última Cita', '15 Ene', false], ['Próxima', '22 Ene', true], ['Total Citas', '24', false]].map(([label, val, blue]) => (
+            <View key={label} style={styles.statBox}>
+              <Text style={styles.statLabel}>{label}</Text>
+              <Text style={[styles.statValue, blue && { color: '#2563EB' }]}>{val}</Text>
+            </View>
+          ))}
+        </View>
 
-          {/* Sección: Tratamiento */}
-          <Text style={styles.sectionTitle}>Tratamiento / Receta</Text>
-          <TextInput
-            style={[styles.textArea, { marginBottom: 30 }]}
-            placeholder="Medicamentos, dosis y recomendaciones..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            value={treatment}
-            onChangeText={setTreatment}
-          />
+        {/* Tabs */}
+        <View style={styles.tabsContainer}>
+          {['Historial', 'Citas', 'Fotos', 'Notas'].map(tab => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, tab === 'Notas' && styles.tabActive]}
+              onPress={() => tab !== 'Notas' && navigation.goBack()}
+            >
+              <Text style={[styles.tabText, tab === 'Notas' && styles.tabTextActive]}>{tab}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Notes area */}
+        <View style={styles.notesSection}>
+          <View style={styles.notesCard}>
+            <Text style={styles.notesTitle}>Observaciones Médicas</Text>
+            <TextInput
+              style={styles.notesInput}
+              placeholder={`Escriba las observaciones médicas del paciente... • Síntomas reportados • Examen físico • Diagnóstico • Plan de tratamiento • Recomendaciones`}
+              placeholderTextColor="#D1D5DB"
+              value={notas}
+              onChangeText={setNotas}
+              multiline
+              textAlignVertical="top"
+            />
+          </View>
+        </View>
 
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.saveBtn}>
+            <Ionicons name="save-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.saveBtnText}>Guardar Notas</Text>
+          </TouchableOpacity>
+          <View style={styles.secondaryRow}>
+            <TouchableOpacity style={styles.draftBtn}>
+              <Ionicons name="time-outline" size={16} color="#374151" style={{ marginRight: 6 }} />
+              <Text style={styles.draftText}>Borrador</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.shareBtn}>
+              <Ionicons name="share-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+              <Text style={styles.shareText}>Compartir</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  headerIcon: {
-    padding: 5,
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  moreBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  patientCard: {
+    flexDirection: 'row', alignItems: 'center',
+    margin: 16, padding: 16, backgroundColor: '#F9FAFB',
+    borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
+  patientAvatar: {
+    width: 56, height: 56, borderRadius: 28, backgroundColor: '#E5E7EB',
+    alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
-  keyboardView: {
-    flex: 1,
+  patientInfo: { flex: 1 },
+  patientName: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  patientId: { fontSize: 13, color: '#6B7280', marginTop: 2 },
+  statusBadge: { color: '#10B981', fontSize: 13, fontWeight: '600', marginTop: 4 },
+  patientMeta: { alignItems: 'flex-end' },
+  ageText: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  generoText: { fontSize: 13, color: '#6B7280' },
+  statsRow: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 },
+  statBox: {
+    flex: 1, backgroundColor: '#F9FAFB', borderRadius: 12,
+    padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#E5E7EB',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+  statLabel: { fontSize: 11, color: '#9CA3AF', marginBottom: 4 },
+  statValue: { fontSize: 15, fontWeight: '700', color: '#111827' },
+  tabsContainer: {
+    flexDirection: 'row', marginHorizontal: 16, marginBottom: 16,
+    backgroundColor: '#F3F4F6', borderRadius: 12, padding: 4,
   },
-  patientSummaryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 20,
+  tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 10 },
+  tabActive: { backgroundColor: '#FFFFFF', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+  tabText: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
+  tabTextActive: { color: '#2563EB', fontWeight: '700' },
+  notesSection: { paddingHorizontal: 16 },
+  notesCard: {
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 14,
+    padding: 16, backgroundColor: '#FAFAFA', minHeight: 220,
   },
-  avatarMini: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#2563EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+  notesTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  notesInput: { flex: 1, fontSize: 14, color: '#374151', minHeight: 160 },
+  buttonsContainer: { paddingHorizontal: 16, marginTop: 20, gap: 10 },
+  saveBtn: {
+    height: 52, backgroundColor: '#2563EB', borderRadius: 14,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
-  avatarMiniText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
+  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  secondaryRow: { flexDirection: 'row', gap: 10 },
+  draftBtn: {
+    flex: 1, height: 48, backgroundColor: '#F3F4F6', borderRadius: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
-  patientSummaryInfo: {
-    flex: 1,
+  draftText: { color: '#374151', fontSize: 14, fontWeight: '600' },
+  shareBtn: {
+    flex: 1, height: 48, backgroundColor: '#10B981', borderRadius: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
-  patientSummaryName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 2,
-  },
-  patientSummaryDesc: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  dateSelectorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 25,
-  },
-  dateBox: {
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
-  },
-  dateBoxActive: {
-    backgroundColor: '#2563EB',
-  },
-  dateDay: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 4,
-  },
-  dateNumber: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  dateTextActive: {
-    color: '#FFFFFF',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 10,
-    marginTop: 5,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    padding: 15,
-    height: 100,
-    fontSize: 15,
-    color: '#1F2937',
-    backgroundColor: '#FFFFFF',
-    marginBottom: 20,
-  },
-  inputSingleLine: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    height: 50,
-    fontSize: 15,
-    color: '#1F2937',
-    backgroundColor: '#FFFFFF',
-    marginBottom: 20,
-  },
-  vitalSignsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 10,
-  },
-  vitalSignBox: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    padding: 12,
-  },
-  vitalSignHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  vitalSignLabel: {
-    fontSize: 12,
-    color: '#4B5563',
-    marginLeft: 4,
-  },
-  vitalSignInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  vitalSignInput: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    padding: 0, // Remover padding por defecto en Android
-  },
-  vitalSignUnit: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginLeft: 4,
-  },
+  shareText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

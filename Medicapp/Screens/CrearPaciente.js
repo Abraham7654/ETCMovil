@@ -1,341 +1,220 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  ScrollView, SafeAreaView, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function NewPatientScreen({ navigation }) {
-  // Estados para guardar la información del formulario
-  const [fullName, setFullName] = useState('');
-  const [age, setAge] = useState('');
-  const [gender, setGender] = useState('');
-  const [phone, setPhone] = useState('');
-  const [emergencyContact, setEmergencyContact] = useState('');
-  const [bloodType, setBloodType] = useState('');
-  const [allergies, setAllergies] = useState('');
-  const [medicalNotes, setMedicalNotes] = useState('');
+const GENEROS = ['Masculino', 'Femenino', 'Otro'];
+const SANGRE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-  const handleSave = () => {
-    // Aquí irá la lógica para guardar en la BD local
-    console.log("Guardando paciente:", { fullName, age, phone });
-    navigation.goBack(); // Regresa a la lista después de guardar
-  };
+export default function CrearPaciente({ navigation }) {
+  const [nombre, setNombre] = useState('');
+  const [edad, setEdad] = useState('');
+  const [genero, setGenero] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [emergencia, setEmergencia] = useState('');
+  const [sangre, setSangre] = useState('');
+  const [alergias, setAlergias] = useState('');
+  const [notas, setNotas] = useState('');
+  const [showGenero, setShowGenero] = useState(false);
+  const [showSangre, setShowSangre] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Nuevo Paciente</Text>
-        <View style={{ width: 24 }} /> {/* Espaciador para centrar el título */}
+        <View style={{ width: 40 }} />
       </View>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
-          {/* Foto de Perfil */}
-          <View style={styles.avatarContainer}>
-            <TouchableOpacity style={styles.avatarPlaceholder}>
-              <Ionicons name="camera" size={32} color="#9CA3AF" />
-              <View style={styles.addIconContainer}>
-                <Ionicons name="add" size={16} color="#FFFFFF" />
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        {/* Avatar */}
+        <View style={styles.avatarContainer}>
+          <View style={styles.avatarCircle}>
+            <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
+          </View>
+          <TouchableOpacity style={styles.addAvatarBtn}>
+            <Ionicons name="add" size={18} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        <Field label="Nombre Completo" value={nombre} onChangeText={setNombre} placeholder="Ingrese el nombre completo" />
+
+        <View style={styles.row}>
+          <View style={{ flex: 1, marginRight: 8 }}>
+            <Field label="Edad" value={edad} onChangeText={setEdad} placeholder="Edad" keyboardType="numeric" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 8 }}>
+            <Text style={styles.label}>Género</Text>
+            <TouchableOpacity style={styles.dropdown} onPress={() => setShowGenero(!showGenero)}>
+              <Text style={[styles.dropdownText, !genero && { color: '#9CA3AF' }]}>
+                {genero || 'Seleccionar'}
+              </Text>
+              <Ionicons name="chevron-down" size={18} color="#374151" />
+            </TouchableOpacity>
+            {showGenero && (
+              <View style={styles.dropdownMenu}>
+                {GENEROS.map(g => (
+                  <TouchableOpacity key={g} style={styles.dropdownItem}
+                    onPress={() => { setGenero(g); setShowGenero(false); }}>
+                    <Text style={styles.dropdownItemText}>{g}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-            </TouchableOpacity>
+            )}
           </View>
+        </View>
 
-          {/* Formulario */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Nombre Completo</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ingrese el nombre completo"
-              placeholderTextColor="#9CA3AF"
-              value={fullName}
-              onChangeText={setFullName}
-            />
-          </View>
+        <Text style={styles.label}>Teléfono</Text>
+        <View style={styles.inputContainer}>
+          <Ionicons name="call-outline" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
+          <TextInput style={styles.input} placeholder="+52 123 456 7890"
+            placeholderTextColor="#9CA3AF" value={telefono} onChangeText={setTelefono}
+            keyboardType="phone-pad" />
+        </View>
 
-          <View style={styles.row}>
-            <View style={[styles.formGroup, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>Edad</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Edad"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-                value={age}
-                onChangeText={setAge}
-              />
-            </View>
-            <View style={[styles.formGroup, { flex: 1, marginLeft: 10 }]}>
-              <Text style={styles.label}>Género</Text>
-              <TouchableOpacity style={styles.pickerInput}>
-                <Text style={styles.pickerText}>{gender || 'Seleccionar'}</Text>
-                <Ionicons name="chevron-down" size={20} color="#1F2937" />
+        <Text style={styles.label}>Contacto de Emergencia</Text>
+        <View style={styles.inputContainer}>
+          <Ionicons name="people-outline" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
+          <TextInput style={styles.input} placeholder="Teléfono de emergencia"
+            placeholderTextColor="#9CA3AF" value={emergencia} onChangeText={setEmergencia}
+            keyboardType="phone-pad" />
+        </View>
+
+        <Text style={styles.label}>Tipo de Sangre</Text>
+        <TouchableOpacity style={styles.dropdown} onPress={() => setShowSangre(!showSangre)}>
+          <Text style={[styles.dropdownText, !sangre && { color: '#9CA3AF' }]}>
+            {sangre || 'Seleccionar tipo'}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#374151" />
+        </TouchableOpacity>
+        {showSangre && (
+          <View style={styles.dropdownMenu}>
+            {SANGRE.map(s => (
+              <TouchableOpacity key={s} style={styles.dropdownItem}
+                onPress={() => { setSangre(s); setShowSangre(false); }}>
+                <Text style={styles.dropdownItemText}>{s}</Text>
               </TouchableOpacity>
-            </View>
+            ))}
           </View>
+        )}
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Teléfono</Text>
-            <View style={styles.inputWithIcon}>
-              <Ionicons name="call" size={20} color="#9CA3AF" style={styles.iconInside} />
-              <TextInput
-                style={styles.inputNoBorder}
-                placeholder="+52 123 456 7890"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={setPhone}
-              />
-            </View>
-          </View>
+        <Text style={[styles.label, { marginTop: 16 }]}>Alergias</Text>
+        <TextInput
+          style={styles.textArea}
+          placeholder="Describa alergias conocidas..."
+          placeholderTextColor="#9CA3AF"
+          value={alergias}
+          onChangeText={setAlergias}
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Contacto de Emergencia</Text>
-            <View style={styles.inputWithIcon}>
-              <Ionicons name="person" size={20} color="#9CA3AF" style={styles.iconInside} />
-              <TextInput
-                style={styles.inputNoBorder}
-                placeholder="Teléfono de emergencia"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="phone-pad"
-                value={emergencyContact}
-                onChangeText={setEmergencyContact}
-              />
-            </View>
-          </View>
+        <Text style={[styles.label, { marginTop: 16 }]}>Notas Médicas</Text>
+        <TextInput
+          style={styles.textArea}
+          placeholder="Antecedentes médicos, medicamentos actuales, condiciones especiales..."
+          placeholderTextColor="#9CA3AF"
+          value={notas}
+          onChangeText={setNotas}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+        />
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Tipo de Sangre</Text>
-            <TouchableOpacity style={styles.pickerInput}>
-              <Text style={styles.pickerText}>{bloodType || 'Seleccionar tipo'}</Text>
-              <Ionicons name="chevron-down" size={20} color="#1F2937" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Alergias</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="Describa alergias conocidas..."
-              placeholderTextColor="#9CA3AF"
-              multiline={true}
-              numberOfLines={4}
-              textAlignVertical="top"
-              value={allergies}
-              onChangeText={setAllergies}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Notas Médicas</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="Antecedentes médicos, medicamentos actuales, condiciones especiales..."
-              placeholderTextColor="#9CA3AF"
-              multiline={true}
-              numberOfLines={4}
-              textAlignVertical="top"
-              value={medicalNotes}
-              onChangeText={setMedicalNotes}
-            />
-          </View>
-
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Botones de Acción (Footer) */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Ionicons name="checkmark" size={20} color="#FFFFFF" style={styles.saveIcon} />
-          <Text style={styles.saveButtonText}>Guardar</Text>
-        </TouchableOpacity>
-      </View>
-
+        <View style={styles.buttons}>
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => navigation.goBack()}>
+            <Text style={styles.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="checkmark" size={18} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.saveText}>Guardar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
+function Field({ label, value, onChangeText, placeholder, keyboardType }) {
+  return (
+    <>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder={placeholder}
+          placeholderTextColor="#9CA3AF"
+          value={value}
+          onChangeText={onChangeText}
+          keyboardType={keyboardType || 'default'}
+        />
+      </View>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  backButton: {
-    padding: 5,
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  scroll: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+  avatarContainer: { alignItems: 'center', marginBottom: 24 },
+  avatarCircle: {
+    width: 96, height: 96, borderRadius: 48,
+    backgroundColor: '#F3F4F6', borderWidth: 2, borderColor: '#E5E7EB',
+    borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2937',
+  addAvatarBtn: {
+    position: 'absolute', bottom: 0, right: '35%',
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center',
   },
-  keyboardView: {
-    flex: 1,
+  row: { flexDirection: 'row' },
+  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8, marginTop: 4 },
+  inputContainer: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    paddingHorizontal: 14, height: 48, marginBottom: 4, backgroundColor: '#FAFAFA',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 40,
+  input: { flex: 1, fontSize: 14, color: '#111827' },
+  dropdown: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    paddingHorizontal: 14, height: 48, backgroundColor: '#FAFAFA', marginBottom: 4,
   },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
+  dropdownText: { fontSize: 14, color: '#111827' },
+  dropdownMenu: {
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    backgroundColor: '#fff', marginBottom: 8,
   },
-  avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    position: 'relative',
-  },
-  addIconContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#2563EB',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 50,
-    fontSize: 16,
-    color: '#1F2937',
-  },
-  pickerInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 50,
-  },
-  pickerText: {
-    fontSize: 16,
-    color: '#1F2937',
-  },
-  inputWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 50,
-  },
-  iconInside: {
-    marginRight: 10,
-  },
-  inputNoBorder: {
-    flex: 1,
-    height: '100%',
-    fontSize: 16,
-    color: '#1F2937',
-  },
+  dropdownItem: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
+  dropdownItemText: { fontSize: 14, color: '#374151' },
   textArea: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingTop: 15,
-    height: 100,
-    fontSize: 16,
-    color: '#1F2937',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    padding: 12, fontSize: 14, color: '#111827',
+    backgroundColor: '#FAFAFA', minHeight: 90, marginBottom: 4,
   },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    backgroundColor: '#FFFFFF',
+  buttons: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  cancelBtn: {
+    flex: 1, height: 50, borderRadius: 12,
+    borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
   },
-  cancelButton: {
-    flex: 1,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    marginRight: 10,
+  cancelText: { fontSize: 15, color: '#374151', fontWeight: '600' },
+  saveBtn: {
+    flex: 2, height: 50, borderRadius: 12,
+    backgroundColor: '#2563EB', flexDirection: 'row',
+    alignItems: 'center', justifyContent: 'center',
   },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  saveButton: {
-    flex: 1,
-    height: 50,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2563EB',
-    borderRadius: 8,
-    marginLeft: 10,
-  },
-  saveIcon: {
-    marginRight: 8,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
+  saveText: { fontSize: 15, color: '#fff', fontWeight: '700' },
 });

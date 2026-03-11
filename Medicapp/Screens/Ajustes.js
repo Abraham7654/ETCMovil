@@ -1,220 +1,181 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView,
-  Switch,
-  Platform
+import {
+  View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView, Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function SettingsScreen({ navigation }) {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-
-  const handleLogout = () => {
-    console.log("Cerrar sesión");
-    // Lógica para cerrar sesión e ir a la pantalla de Login
-  };
-
-  const renderSettingItem = (icon, title, onPress, showArrow = true, rightElement = null) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress} disabled={!onPress}>
-      <View style={styles.settingItemLeft}>
-        <View style={styles.iconBox}>
-          <Ionicons name={icon} size={20} color="#4B5563" />
-        </View>
-        <Text style={styles.settingItemTitle}>{title}</Text>
-      </View>
-      {rightElement ? (
-        rightElement
-      ) : showArrow ? (
-        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-      ) : null}
-    </TouchableOpacity>
-  );
+export default function Ajustes({ navigation }) {
+  const [modoOscuro, setModoOscuro] = useState(false);
+  const [notifPush, setNotifPush] = useState(true);
+  const [notifCitas, setNotifCitas] = useState(true);
+  const [notifEmail, setNotifEmail] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      {/* Header */}
+      <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Ajustes</Text>
+        <Text style={styles.title}>Ajustes</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* Sección: Cuenta */}
-        <Text style={styles.sectionTitle}>Cuenta</Text>
-        <View style={styles.sectionContainer}>
-          {renderSettingItem('person-outline', 'Perfil', () => navigation.navigate('Profile'))}
-          <View style={styles.divider} />
-          {renderSettingItem(
-            'notifications-outline', 
-            'Notificaciones', 
-            null, 
-            false,
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Profile row */}
+        <TouchableOpacity style={styles.profileRow} onPress={() => navigation.navigate('Perfil')}>
+          <View style={styles.profileAvatar}>
+            <Ionicons name="person" size={24} color="#9CA3AF" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.profileName}>Dr. Carlos Méndez</Text>
+            <Text style={styles.profileRole}>Medico General</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+        </TouchableOpacity>
+
+        {/* General */}
+        <SectionTitle title="General" />
+        <View style={styles.section}>
+          <View style={styles.settingRow}>
+            <View style={[styles.settingIcon, { backgroundColor: '#1E1B4B' }]}>
+              <Ionicons name="moon" size={16} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingLabel}>Modo Oscuro</Text>
+              <Text style={styles.settingDesc}>Tema visual de la app</Text>
+            </View>
             <Switch
-              trackColor={{ false: "#D1D5DB", true: "#93C5FD" }}
-              thumbColor={notificationsEnabled ? "#2563EB" : "#F3F4F6"}
-              ios_backgroundColor="#D1D5DB"
-              onValueChange={setNotificationsEnabled}
-              value={notificationsEnabled}
+              value={modoOscuro}
+              onValueChange={setModoOscuro}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}
+              ios_backgroundColor="#E5E7EB"
             />
-          )}
-        </View>
-
-        {/* Sección: Clínica */}
-        <Text style={styles.sectionTitle}>Clínica</Text>
-        <View style={styles.sectionContainer}>
-          {renderSettingItem('time-outline', 'Horarios de Atención', () => console.log('Horarios'))}
+          </View>
           <View style={styles.divider} />
-          {renderSettingItem('card-outline', 'Métodos de Pago', () => console.log('Pagos'))}
+          <SettingItem icon="language-outline" iconBg="#3B82F6" label="Idioma" desc="Español" arrow />
         </View>
 
-        {/* Sección: Soporte */}
-        <Text style={styles.sectionTitle}>Soporte</Text>
-        <View style={styles.sectionContainer}>
-          {renderSettingItem('help-circle-outline', 'Ayuda', () => console.log('Ayuda'))}
+        {/* Notificaciones */}
+        <SectionTitle title="Notificaciones" />
+        <View style={styles.section}>
+          <View style={styles.settingRow}>
+            <View style={[styles.settingIcon, { backgroundColor: '#2563EB' }]}>
+              <Ionicons name="notifications" size={16} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingLabel}>Notificaciones Push</Text>
+              <Text style={styles.settingDesc}>Alertas y recordatorios</Text>
+            </View>
+            <Switch value={notifPush} onValueChange={setNotifPush}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}  />
+          </View>
           <View style={styles.divider} />
-          {renderSettingItem('document-text-outline', 'Términos y Condiciones', () => console.log('TyC'))}
+          <View style={styles.settingRow}>
+            <View style={[styles.settingIcon, { backgroundColor: '#7C3AED' }]}>
+              <Ionicons name="calendar" size={16} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingLabel}>Recordatorios de Citas</Text>
+              <Text style={styles.settingDesc}>30 min antes de cada cita</Text>
+            </View>
+            <Switch value={notifCitas} onValueChange={setNotifCitas}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}  />
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.settingRow}>
+            <View style={[styles.settingIcon, { backgroundColor: '#0EA5E9' }]}>
+              <Ionicons name="mail" size={16} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingLabel}>Notificaciones por Email</Text>
+              <Text style={styles.settingDesc}>Resúmenes diarios</Text>
+            </View>
+            <Switch value={notifEmail} onValueChange={setNotifEmail}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}  />
+          </View>
         </View>
 
-        {/* Botón de Cerrar Sesión */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" style={{ marginRight: 8 }} />
+        {/* Seguridad */}
+        <SectionTitle title="Seguridad" />
+        <View style={styles.section}>
+          <SettingItem icon="lock-closed" iconBg="#6B7280" label="Cambiar Contraseña" arrow />
+        </View>
+
+        {/* Soporte */}
+        <SectionTitle title="Soporte" />
+        <View style={styles.section}>
+          <SettingItem icon="help-circle" iconBg="#3B82F6" label="Centro de Ayuda" arrow />
+          <View style={styles.divider} />
+          <SettingItem icon="headset" iconBg="#6366F1" label="Contactar Soporte" arrow />
+          <View style={styles.divider} />
+          <SettingItem icon="shield-checkmark" iconBg="#2563EB" label="Política de Privacidad" arrow />
+          <View style={styles.divider} />
+          <SettingItem icon="document-text" iconBg="#374151" label="Términos y Condiciones" arrow />
+        </View>
+
+        <TouchableOpacity style={styles.logoutBtn}>
+          <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.logoutText}>Cerrar Sesión</Text>
         </TouchableOpacity>
 
+        <Text style={styles.version}>Versión 1.2.4</Text>
       </ScrollView>
-
-      {/* Bottom Tabs (Visual) */}
-      <View style={styles.bottomTab}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Patients')}>
-          <Ionicons name="people" size={24} color="#9CA3AF" />
-          <Text style={styles.tabText}>Pacientes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Appointments')}>
-          <Ionicons name="calendar" size={24} color="#9CA3AF" />
-          <Text style={styles.tabText}>Citas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="settings" size={24} color="#2563EB" />
-          <Text style={[styles.tabText, { color: '#2563EB' }]}>Ajustes</Text>
-        </TouchableOpacity>
-      </View>
-
     </SafeAreaView>
   );
 }
 
+function SectionTitle({ title }) {
+  return <Text style={styles.sectionTitle}>{title}</Text>;
+}
+
+function SettingItem({ icon, iconBg, label, desc, arrow }) {
+  return (
+    <TouchableOpacity style={styles.settingRow}>
+      <View style={[styles.settingIcon, { backgroundColor: iconBg }]}>
+        <Ionicons name={icon} size={16} color="#fff" />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.settingLabel}>{label}</Text>
+        {desc && <Text style={styles.settingDesc}>{desc}</Text>}
+      </View>
+      {arrow && <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />}
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB', // Fondo ligeramente gris
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  title: { fontSize: 26, fontWeight: '800', color: '#111827' },
+  scroll: { paddingHorizontal: 16, paddingBottom: 40 },
+  profileRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#fff', borderRadius: 14,
+    padding: 14, marginBottom: 20,
+    borderWidth: 1, borderColor: '#E5E7EB',
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    paddingBottom: 15,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+  profileAvatar: {
+    width: 48, height: 48, borderRadius: 24,
+    backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 100, // Espacio para Bottom Tabs
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-    textTransform: 'uppercase',
-    marginBottom: 8,
-    marginTop: 10,
-    marginLeft: 4,
-  },
-  sectionContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 24,
+  profileName: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  profileRole: { fontSize: 13, color: '#6B7280', marginTop: 2 },
+  sectionTitle: { fontSize: 12, fontWeight: '700', color: '#9CA3AF', textTransform: 'uppercase', marginBottom: 6, marginTop: 4, letterSpacing: 0.5 },
+  section: {
+    backgroundColor: '#fff', borderRadius: 14,
+    marginBottom: 16, borderWidth: 1, borderColor: '#E5E7EB',
     overflow: 'hidden',
   },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
+  settingRow: { flexDirection: 'row', alignItems: 'center', padding: 14 },
+  settingIcon: {
+    width: 34, height: 34, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
-  settingItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  settingLabel: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  settingDesc: { fontSize: 12, color: '#9CA3AF', marginTop: 1 },
+  divider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 60 },
+  logoutBtn: {
+    height: 52, backgroundColor: '#EF4444', borderRadius: 14,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8,
   },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  settingItemTitle: {
-    fontSize: 16,
-    color: '#1F2937',
-    fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E5E7EB',
-    marginLeft: 60, // Para alinear con el texto, saltando el icono
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FEF2F2', // Rojo muy clarito
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-  },
-  logoutText: {
-    color: '#EF4444',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingVertical: 10,
-    paddingBottom: Platform.OS === 'ios' ? 25 : 10,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#9CA3AF',
-  },
+  logoutText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  version: { textAlign: 'center', color: '#9CA3AF', fontSize: 12, marginTop: 16 },
 });

@@ -1,232 +1,196 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function NewAppointmentScreen({ navigation }) {
-  // Estados para el formulario
-  const [patient, setPatient] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [appointmentType, setAppointmentType] = useState('');
-  const [reason, setReason] = useState('');
+const HORAS = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
 
-  const handleSave = () => {
-    console.log("Guardando cita...", { patient, date, time, appointmentType, reason });
-    navigation.goBack(); // Regresa a la lista después de agendar
-  };
+export default function CrearCita({ navigation }) {
+  const [paciente, setPaciente] = useState('');
+  const [doctor, setDoctor] = useState('');
+  const [fecha, setFecha] = useState('');
+  const [hora, setHora] = useState('');
+  const [motivo, setMotivo] = useState('');
+  const [notas, setNotas] = useState('');
+  const [recordatorio, setRecordatorio] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Nueva Cita</Text>
-        <View style={{ width: 24 }} /> {/* Espaciador */}
+        <View style={{ width: 40 }} />
       </View>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
-          {/* Campo: Paciente */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Paciente</Text>
-            <TouchableOpacity style={styles.pickerInput}>
-              <Text style={[styles.pickerText, !patient && styles.placeholderText]}>
-                {patient || 'Seleccionar paciente'}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-          {/* Fila: Fecha y Hora */}
-          <View style={styles.row}>
-            <View style={[styles.formGroup, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>Fecha</Text>
-              <TouchableOpacity style={styles.pickerInput}>
-                <Text style={[styles.pickerText, !date && styles.placeholderText]}>
-                  {date || 'DD/MM/AAAA'}
-                </Text>
-                <Ionicons name="calendar-outline" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={[styles.formGroup, { flex: 1, marginLeft: 10 }]}>
-              <Text style={styles.label}>Hora</Text>
-              <TouchableOpacity style={styles.pickerInput}>
-                <Text style={[styles.pickerText, !time && styles.placeholderText]}>
-                  {time || '00:00'}
-                </Text>
-                <Ionicons name="time-outline" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Campo: Tipo de Consulta */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Tipo de Consulta</Text>
-            <TouchableOpacity style={styles.pickerInput}>
-              <Text style={[styles.pickerText, !appointmentType && styles.placeholderText]}>
-                {appointmentType || 'Ej: Consulta General'}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Campo: Motivo de Cita */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Motivo de la Cita</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="Describa brevemente el motivo..."
-              placeholderTextColor="#9CA3AF"
-              multiline={true}
-              numberOfLines={4}
-              textAlignVertical="top"
-              value={reason}
-              onChangeText={setReason}
-            />
-          </View>
-
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Footer / Botones */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
+        {/* Paciente */}
+        <Text style={styles.label}>Paciente <Text style={styles.required}>*</Text></Text>
+        <TouchableOpacity style={styles.selectRow}>
+          <Text style={styles.selectPlaceholder}>Seleccionar paciente</Text>
+          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Agendar Cita</Text>
-        </TouchableOpacity>
-      </View>
 
+        {/* Doctor */}
+        <Text style={styles.label}>Doctor <Text style={styles.required}>*</Text></Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre del doctor"
+            placeholderTextColor="#9CA3AF"
+            value={doctor}
+            onChangeText={setDoctor}
+          />
+          <Ionicons name="person-circle-outline" size={20} color="#9CA3AF" />
+        </View>
+
+        {/* Fecha */}
+        <Text style={styles.label}>Fecha <Text style={styles.required}>*</Text></Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Seleccionar fecha"
+            placeholderTextColor="#9CA3AF"
+            value={fecha}
+            onChangeText={setFecha}
+          />
+          <Ionicons name="calendar-outline" size={20} color="#9CA3AF" />
+        </View>
+
+        {/* Hora */}
+        <Text style={styles.label}>Hora <Text style={styles.required}>*</Text></Text>
+        <View style={styles.horasGrid}>
+          {HORAS.map(h => (
+            <TouchableOpacity
+              key={h}
+              style={[styles.horaChip, hora === h && styles.horaChipActive]}
+              onPress={() => setHora(h)}
+            >
+              <Text style={[styles.horaText, hora === h && styles.horaTextActive]}>{h}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Motivo */}
+        <Text style={styles.label}>Motivo de consulta <Text style={styles.required}>*</Text></Text>
+        <TextInput
+          style={styles.textArea}
+          placeholder="Describa el motivo de la consulta..."
+          placeholderTextColor="#9CA3AF"
+          value={motivo}
+          onChangeText={setMotivo}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+        />
+
+        {/* Notas */}
+        <Text style={styles.label}>Notas adicionales</Text>
+        <TextInput
+          style={styles.textArea}
+          placeholder="Información adicional (opcional)"
+          placeholderTextColor="#9CA3AF"
+          value={notas}
+          onChangeText={setNotas}
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
+
+        {/* Recordatorio */}
+        <TouchableOpacity
+          style={styles.recordatorioRow}
+          onPress={() => setRecordatorio(!recordatorio)}
+        >
+          <View style={[styles.checkbox, recordatorio && styles.checkboxActive]}>
+            {recordatorio && <Ionicons name="checkmark" size={14} color="#fff" />}
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.recordatorioLabel}>Enviar recordatorio</Text>
+            <Text style={styles.recordatorioSub}>El paciente recibirá una notificación 24 horas antes</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Buttons */}
+        <View style={styles.buttons}>
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => navigation.goBack()}>
+            <Text style={styles.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.confirmBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="checkmark" size={18} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.confirmText}>Confirmar Cita</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  backButton: {
-    padding: 5,
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  scroll: { padding: 20, paddingBottom: 40 },
+  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8, marginTop: 4 },
+  required: { color: '#EF4444' },
+  selectRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    paddingHorizontal: 14, height: 48, marginBottom: 12, backgroundColor: '#FAFAFA',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2937',
+  selectPlaceholder: { color: '#9CA3AF', fontSize: 14 },
+  inputContainer: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    paddingHorizontal: 14, height: 48, marginBottom: 12, backgroundColor: '#FAFAFA',
   },
-  keyboardView: {
-    flex: 1,
+  input: { flex: 1, fontSize: 14, color: '#111827' },
+  horasGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16,
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 25,
-    paddingBottom: 40,
+  horaChip: {
+    paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10,
+    borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FAFAFA',
   },
-  formGroup: {
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  pickerInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 50,
-    backgroundColor: '#FFFFFF',
-  },
-  pickerText: {
-    fontSize: 16,
-    color: '#1F2937',
-  },
-  placeholderText: {
-    color: '#9CA3AF',
-  },
+  horaChipActive: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
+  horaText: { fontSize: 14, color: '#374151', fontWeight: '500' },
+  horaTextActive: { color: '#fff', fontWeight: '700' },
   textArea: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingTop: 15,
-    height: 120,
-    fontSize: 16,
-    color: '#1F2937',
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
+    padding: 12, fontSize: 14, color: '#111827',
+    backgroundColor: '#FAFAFA', minHeight: 90, marginBottom: 12,
   },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    backgroundColor: '#FFFFFF',
+  recordatorioRow: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    backgroundColor: '#F9FAFB', borderRadius: 12, padding: 14, marginBottom: 20,
   },
-  cancelButton: {
-    flex: 1,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    marginRight: 10,
+  checkbox: {
+    width: 20, height: 20, borderRadius: 4, borderWidth: 1.5, borderColor: '#D1D5DB',
+    alignItems: 'center', justifyContent: 'center',
   },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
+  checkboxActive: { backgroundColor: '#2563EB', borderColor: '#2563EB' },
+  recordatorioLabel: { fontSize: 14, fontWeight: '600', color: '#374151' },
+  recordatorioSub: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  buttons: { flexDirection: 'row', gap: 10 },
+  cancelBtn: {
+    flex: 1, height: 50, borderRadius: 12,
+    borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
   },
-  saveButton: {
-    flex: 1,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2563EB',
-    borderRadius: 8,
-    marginLeft: 10,
+  cancelText: { color: '#374151', fontSize: 15, fontWeight: '600' },
+  confirmBtn: {
+    flex: 2, height: 50, borderRadius: 12,
+    backgroundColor: '#2563EB', flexDirection: 'row',
+    alignItems: 'center', justifyContent: 'center',
   },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
+  confirmText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

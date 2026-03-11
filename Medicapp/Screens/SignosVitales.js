@@ -1,214 +1,197 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function VitalSignsScreen({ navigation }) {
-  // Estados para cada signo vital
-  const [bloodPressure, setBloodPressure] = useState('');
-  const [heartRate, setHeartRate] = useState('');
-  const [respiratoryRate, setRespiratoryRate] = useState('');
-  const [temperature, setTemperature] = useState('');
-  const [oxygen, setOxygen] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [glucose, setGlucose] = useState('');
-
-  const handleSave = () => {
-    console.log("Guardando signos vitales...");
-    navigation.goBack();
-  };
-
-  // Componente reutilizable para cada campo
-  const renderInputRow = (label, value, setValue, unit, placeholder, keyboardType = 'numeric') => (
-    <View style={styles.inputRow}>
-      <Text style={styles.inputLabel}>{label}</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.textInput}
-          placeholder={placeholder}
-          placeholderTextColor="#D1D5DB"
-          value={value}
-          onChangeText={setValue}
-          keyboardType={keyboardType}
-        />
-        <Text style={styles.unitText}>{unit}</Text>
-      </View>
-    </View>
-  );
+export default function SignosVitales({ navigation }) {
+  const [peso, setPeso] = useState('');
+  const [presion, setPresion] = useState('');
+  const [frecuencia, setFrecuencia] = useState('');
+  const [temperatura, setTemperatura] = useState('');
+  const [notas, setNotas] = useState('');
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Signos Vitales</Text>
-        <TouchableOpacity onPress={handleSave} style={styles.headerIcon}>
-          <Ionicons name="checkmark" size={24} color="#2563EB" />
+        <TouchableOpacity style={styles.moreBtn}>
+          <Ionicons name="ellipsis-vertical" size={20} color="#374151" />
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        {/* Patient */}
+        <View style={styles.patientRow}>
+          <View style={styles.patientAvatar}>
+            <Ionicons name="person" size={20} color="#9CA3AF" />
+          </View>
+          <View>
+            <Text style={styles.patientName}>María González</Text>
+            <Text style={styles.patientMeta}>ID: 001234 • 45 años</Text>
+          </View>
+        </View>
 
-          {/* Tarjeta de Resumen del Paciente */}
-          <View style={styles.patientSummaryCard}>
-            <View style={styles.avatarMini}>
-              <Text style={styles.avatarMiniText}>MG</Text>
-            </View>
-            <View style={styles.patientSummaryInfo}>
-              <Text style={styles.patientSummaryName}>María González</Text>
-              <Text style={styles.patientSummaryDesc}>Consulta General - Hoy, 09:30 AM</Text>
+        {/* Date */}
+        <View style={styles.dateCard}>
+          <View style={styles.dateLeft}>
+            <Ionicons name="calendar-outline" size={20} color="#2563EB" style={{ marginRight: 10 }} />
+            <View>
+              <Text style={styles.dateLabel}>Fecha y hora</Text>
+              <Text style={styles.dateValue}>15 Feb 2024, 10:30 AM</Text>
             </View>
           </View>
+          <TouchableOpacity>
+            <Text style={styles.changeText}>Cambiar</Text>
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.formContainer}>
-            {renderInputRow('Presión Arterial', bloodPressure, setBloodPressure, 'mmHg', '120/80', 'numbers-and-punctuation')}
-            <View style={styles.divider} />
-            {renderInputRow('Frec. Cardíaca', heartRate, setHeartRate, 'lpm', '72')}
-            <View style={styles.divider} />
-            {renderInputRow('Frec. Respiratoria', respiratoryRate, setRespiratoryRate, 'rpm', '16')}
-            <View style={styles.divider} />
-            {renderInputRow('Temperatura', temperature, setTemperature, '°C', '36.5', 'decimal-pad')}
-            <View style={styles.divider} />
-            {renderInputRow('Saturación O2', oxygen, setOxygen, '%', '98')}
-            <View style={styles.divider} />
-            {renderInputRow('Peso', weight, setWeight, 'kg', '65', 'decimal-pad')}
-            <View style={styles.divider} />
-            {renderInputRow('Estatura', height, setHeight, 'm', '1.65', 'decimal-pad')}
-            <View style={styles.divider} />
-            {renderInputRow('Glucosa (Opcional)', glucose, setGlucose, 'mg/dL', '90')}
+        {/* Vitals */}
+        <VitalCard
+          label="Peso" unit="Kilogramos" value={peso} onChangeText={setPeso}
+          iconBg="#D1FAE5" iconColor="#10B981" icon="scale-outline" placeholder="0.0"
+        />
+        <VitalCard
+          label="Presión Arterial" unit="mmHg" value={presion} onChangeText={setPresion}
+          iconBg="#FEE2E2" iconColor="#EF4444" icon="heart" placeholder="120"
+        />
+        <VitalCard
+          label="Frecuencia Cardíaca" unit="Latidos por minuto" value={frecuencia} onChangeText={setFrecuencia}
+          iconBg="#DBEAFE" iconColor="#2563EB" icon="heart-circle-outline" placeholder="72"
+        />
+        <VitalCard
+          label="Temperatura" unit="Grados Celsius" value={temperatura} onChangeText={setTemperatura}
+          iconBg="#FEF3C7" iconColor="#F59E0B" icon="thermometer-outline" placeholder="36.5"
+        />
+
+        {/* Notes */}
+        <View style={styles.vitalCard}>
+          <View style={styles.vitalHeader}>
+            <View style={[styles.vitalIcon, { backgroundColor: '#374151' }]}>
+              <Ionicons name="document-text-outline" size={16} color="#fff" />
+            </View>
+            <View>
+              <Text style={styles.vitalLabel}>Notas Adicionales</Text>
+              <Text style={styles.vitalUnit}>Opcional</Text>
+            </View>
           </View>
+          <TextInput
+            style={styles.notesInput}
+            placeholder="Agregar observaciones..."
+            placeholderTextColor="#9CA3AF"
+            value={notas}
+            onChangeText={setNotas}
+            multiline
+            textAlignVertical="top"
+          />
+        </View>
+      </ScrollView>
 
-        </ScrollView>
-      </KeyboardAvoidingView>
+      {/* Bottom buttons */}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.draftBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.draftText}>Borrador</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.saveBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.saveText}>Guardar</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 
+function VitalCard({ label, unit, value, onChangeText, iconBg, iconColor, icon, placeholder }) {
+  return (
+    <View style={styles.vitalCard}>
+      <View style={styles.vitalHeader}>
+        <View style={[styles.vitalIcon, { backgroundColor: iconBg }]}>
+          <Ionicons name={icon} size={16} color={iconColor} />
+        </View>
+        <View>
+          <Text style={styles.vitalLabel}>{label}</Text>
+          <Text style={styles.vitalUnit}>{unit}</Text>
+        </View>
+      </View>
+      <TextInput
+        style={styles.vitalInput}
+        placeholder={placeholder}
+        placeholderTextColor="#D1D5DB"
+        value={value}
+        onChangeText={onChangeText}
+        keyboardType="decimal-pad"
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB', // Fondo claro para contrastar la tarjeta blanca
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    paddingBottom: 15,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  headerIcon: {
-    padding: 5,
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  moreBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  scroll: { padding: 16, paddingBottom: 100 },
+  patientRow: {
+    flexDirection: 'row', alignItems: 'center',
+    padding: 14, backgroundColor: '#F9FAFB', borderRadius: 14,
+    borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
+  patientAvatar: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
-  keyboardView: {
-    flex: 1,
+  patientName: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  patientMeta: { fontSize: 13, color: '#6B7280' },
+  dateCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: 14, borderWidth: 1, borderColor: '#E5E7EB',
+    borderRadius: 14, marginBottom: 12, backgroundColor: '#FAFAFA',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
+  dateLeft: { flexDirection: 'row', alignItems: 'center' },
+  dateLabel: { fontSize: 11, color: '#9CA3AF' },
+  dateValue: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  changeText: { color: '#2563EB', fontSize: 14, fontWeight: '600' },
+  vitalCard: {
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 14,
+    padding: 14, marginBottom: 12, backgroundColor: '#FAFAFA',
   },
-  patientSummaryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+  vitalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  vitalIcon: {
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center', marginRight: 10,
   },
-  avatarMini: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#2563EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+  vitalLabel: { fontSize: 14, fontWeight: '700', color: '#111827' },
+  vitalUnit: { fontSize: 12, color: '#6B7280' },
+  vitalInput: {
+    fontSize: 28, fontWeight: '300', color: '#9CA3AF',
+    backgroundColor: '#F3F4F6', borderRadius: 10, padding: 12,
   },
-  avatarMiniText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
+  notesInput: {
+    fontSize: 14, color: '#374151', backgroundColor: '#F3F4F6',
+    borderRadius: 10, padding: 12, minHeight: 80,
   },
-  patientSummaryInfo: {
-    flex: 1,
+  footer: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    flexDirection: 'row', padding: 16, gap: 12,
+    backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#E5E7EB',
   },
-  patientSummaryName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 4,
+  draftBtn: {
+    flex: 1, height: 50, borderRadius: 12,
+    borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
   },
-  patientSummaryDesc: {
-    fontSize: 12,
-    color: '#6B7280',
+  draftText: { color: '#374151', fontWeight: '600', fontSize: 15 },
+  saveBtn: {
+    flex: 2, height: 50, borderRadius: 12,
+    backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center',
   },
-  formContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    paddingHorizontal: 16,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  inputLabel: {
-    fontSize: 15,
-    color: '#374151',
-    fontWeight: '500',
-    flex: 1,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  textInput: {
-    fontSize: 16,
-    color: '#1F2937',
-    textAlign: 'right',
-    paddingRight: 8,
-    minWidth: 80, // Asegura que haya espacio para escribir
-  },
-  unitText: {
-    fontSize: 15,
-    color: '#9CA3AF',
-    width: 45, // Ancho fijo para que las unidades se alineen
-    textAlign: 'left',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#F3F4F6',
-  },
+  saveText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

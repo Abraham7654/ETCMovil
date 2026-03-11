@@ -1,222 +1,196 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform
+import {
+  View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView, Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function ProfileScreen({ navigation }) {
-  // Estados inicializados con datos de ejemplo del diseño
-  const [name, setName] = useState('Dr. Roberto Gómez');
-  const [specialty, setSpecialty] = useState('Médico General');
-  const [license, setLicense] = useState('12345678');
-  const [email, setEmail] = useState('dr.roberto@email.com');
-  const [phone, setPhone] = useState('+52 123 456 7890');
-
-  const handleSave = () => {
-    console.log("Guardando perfil:", { name, specialty });
-    navigation.goBack();
-  };
+export default function Perfil({ navigation }) {
+  const [twoFactor, setTwoFactor] = useState(true);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mi Perfil</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
-          {/* Foto de Perfil */}
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatarWrapper}>
-              {/* Aquí iría la imagen real, por ahora usamos un icono */}
-              <Ionicons name="person" size={50} color="#9CA3AF" />
-              <TouchableOpacity style={styles.editBadge}>
-                <Ionicons name="camera" size={14} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Formulario */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Nombre Completo</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Especialidad</Text>
-            <TextInput
-              style={styles.input}
-              value={specialty}
-              onChangeText={setSpecialty}
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Cédula Profesional</Text>
-            <TextInput
-              style={styles.input}
-              value={license}
-              onChangeText={setLicense}
-              keyboardType="numeric"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Correo Electrónico</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Teléfono</Text>
-            <TextInput
-              style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+        <TouchableOpacity style={styles.editBtn}>
+          <Ionicons name="pencil" size={20} color="#2563EB" />
         </TouchableOpacity>
       </View>
 
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Avatar */}
+        <View style={styles.avatarSection}>
+          <View style={styles.avatarCircle}>
+            <Ionicons name="person" size={40} color="#9CA3AF" />
+            <TouchableOpacity style={styles.cameraBtn}>
+              <Ionicons name="camera" size={14} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.doctorName}>Dr. Carlos Méndez</Text>
+          <Text style={styles.doctorRole}>Médico General</Text>
+        </View>
+
+        {/* Personal Info */}
+        <InfoSection title="Información Personal" icon="person-outline" iconColor="#2563EB">
+          <InfoRow label="Nombre Completo" value="María Elena González Ruiz" />
+          <InfoRow label="Email" value="maria.gonzalez@clinica.com" />
+          <InfoRow label="Teléfono" value="+34 612 345 678" last />
+        </InfoSection>
+
+        {/* Professional */}
+        <InfoSection title="Información Profesional" icon="medical-outline" iconColor="#7C3AED">
+          <InfoRow label="Especialidad" value="Medicina General" />
+          <InfoRow label="Colegio Médico" value="CM-28-45678" />
+          <InfoRow label="Centro de Trabajo" value="Clínica San Rafael" last />
+        </InfoSection>
+
+        {/* Security */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIconBox, { backgroundColor: '#EFF6FF' }]}>
+              <Ionicons name="shield-outline" size={18} color="#2563EB" />
+            </View>
+            <Text style={styles.sectionTitle}>Seguridad</Text>
+          </View>
+
+          <TouchableOpacity style={styles.row}>
+            <Text style={styles.rowLabel}>Cambiar Contraseña</Text>
+            <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>Autenticación en Dos Pasos</Text>
+              <Text style={[styles.rowSub, twoFactor && { color: '#10B981' }]}>
+                {twoFactor ? 'Activada' : 'Desactivada'}
+              </Text>
+            </View>
+            <Switch
+              value={twoFactor}
+              onValueChange={setTwoFactor}
+              trackColor={{ false: '#E5E7EB', true: '#10B981' }}
+              
+            />
+          </View>
+        </View>
+
+        {/* App Config */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIconBox, { backgroundColor: '#F3F4F6' }]}>
+              <Ionicons name="settings-outline" size={18} color="#374151" />
+            </View>
+            <Text style={styles.sectionTitle}>Configuración de App</Text>
+          </View>
+          <TouchableOpacity style={styles.row}>
+            <Text style={styles.rowLabel}>Notificaciones</Text>
+            <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity style={styles.row}>
+            <Text style={styles.rowLabel}>Privacidad</Text>
+            <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity style={styles.row}>
+            <Text style={styles.rowLabel}>Ayuda y Soporte</Text>
+            <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => navigation.navigate('InicioDeSesion')}>
+          <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.logoutText}>Cerrar Sesión</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
+function InfoSection({ title, icon, iconColor, children }) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <View style={[styles.sectionIconBox, { backgroundColor: '#EFF6FF' }]}>
+          <Ionicons name={icon} size={18} color={iconColor} />
+        </View>
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      {children}
+    </View>
+  );
+}
+
+function InfoRow({ label, value, last }) {
+  return (
+    <>
+      <TouchableOpacity style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.rowSublabel}>{label}</Text>
+          <Text style={styles.rowLabel}>{value}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+      </TouchableOpacity>
+      {!last && <View style={styles.divider} />}
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12,
+    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  backButton: {
-    padding: 5,
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  editBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  scroll: { paddingHorizontal: 16, paddingBottom: 40 },
+  avatarSection: { alignItems: 'center', paddingVertical: 24 },
+  avatarCircle: {
+    width: 90, height: 90, borderRadius: 45,
+    backgroundColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
+    marginBottom: 12,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2937',
+  cameraBtn: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: '#F9FAFB',
   },
-  keyboardView: {
-    flex: 1,
+  doctorName: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  doctorRole: { fontSize: 14, color: '#6B7280', marginTop: 2 },
+  section: {
+    backgroundColor: '#fff', borderRadius: 14,
+    marginBottom: 14, borderWidth: 1, borderColor: '#E5E7EB',
+    overflow: 'hidden',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 40,
+  sectionHeader: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
+  sectionIconBox: {
+    width: 32, height: 32, borderRadius: 8,
+    alignItems: 'center', justifyContent: 'center', marginRight: 10,
   },
-  avatarWrapper: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#111827' },
+  row: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 14, paddingVertical: 12,
   },
-  editBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#2563EB',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+  rowSublabel: { fontSize: 11, color: '#9CA3AF', marginBottom: 2 },
+  rowLabel: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  rowSub: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  divider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 14 },
+  logoutBtn: {
+    height: 52, backgroundColor: '#EF4444', borderRadius: 14,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8,
   },
-  formGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 50,
-    fontSize: 16,
-    color: '#1F2937',
-    backgroundColor: '#FFFFFF',
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    backgroundColor: '#FFFFFF',
-  },
-  saveButton: {
-    height: 50,
-    backgroundColor: '#2563EB',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
+  logoutText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });
