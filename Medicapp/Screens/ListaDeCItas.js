@@ -1,19 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  TextInput,
-} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { lightTheme, darkTheme } from '../theme/theme';
 
 const FILTROS = ['Hoy', 'Mañana', 'Esta Semana'];
-
 const CITAS = [
   { id: '1', paciente: 'María González', tipo: 'Consulta General', inicio: '09:00', fin: '09:30', doctor: 'Dr. Martínez', estado: 'Confirmada' },
   { id: '2', paciente: 'Carlos Rodríguez', tipo: 'Cardiología', inicio: '10:30', fin: '11:00', doctor: 'Dr. López', estado: 'Pendiente' },
@@ -23,12 +13,14 @@ const CITAS = [
   { id: '6', paciente: 'Roberto Vega', tipo: 'Traumatología', inicio: '16:45', fin: '17:15', doctor: 'Dr. Castro', estado: 'Confirmada' },
 ];
 
-export default function ListaDeCitas({ navigation }) {
+export default function ListaDeCitas({ navigation, route }) {
+  const { darkMode } = route?.params || {};
+  const t = darkMode ? darkTheme : lightTheme;
   const [filtro, setFiltro] = useState('Hoy');
   const [busqueda, setBusqueda] = useState('');
   const [mostrandoBuscador, setMostrandoBuscador] = useState(false);
 
-  const citasFiltradas = CITAS.filter(c => 
+  const citasFiltradas = CITAS.filter(c =>
     c.paciente.toLowerCase().includes(busqueda.toLowerCase()) ||
     c.tipo.toLowerCase().includes(busqueda.toLowerCase())
   );
@@ -37,111 +29,75 @@ export default function ListaDeCitas({ navigation }) {
   const pendientes = citasFiltradas.filter(c => c.estado === 'Pendiente').length;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      
+    <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+      <StatusBar barStyle={t.statusBar} />
       <View style={styles.header}>
         <View style={styles.menuBtn} />
-        
         {mostrandoBuscador ? (
-          <TextInput
-            style={styles.headerSearchInput}
-            placeholder="Buscar paciente o cita..."
-            placeholderTextColor="#9CA3AF"
-            value={busqueda}
-            onChangeText={setBusqueda}
-            autoFocus
-          />
+          <TextInput style={[styles.headerSearchInput, { backgroundColor: t.input, color: t.text }]}
+            placeholder="Buscar paciente o cita..." placeholderTextColor={t.textMuted}
+            value={busqueda} onChangeText={setBusqueda} autoFocus />
         ) : (
-          <Text style={styles.title}>Citas</Text>
+          <Text style={[styles.title, { color: t.text }]}>Citas</Text>
         )}
-
-        <TouchableOpacity 
-          style={styles.searchBtn} 
-          onPress={() => {
-            setMostrandoBuscador(!mostrandoBuscador);
-            if (mostrandoBuscador) setBusqueda('');
-          }}
-        >
-          <Ionicons name={mostrandoBuscador ? "close" : "search"} size={22} color="#374151" />
+        <TouchableOpacity style={styles.searchBtn} onPress={() => { setMostrandoBuscador(!mostrandoBuscador); if (mostrandoBuscador) setBusqueda(''); }}>
+          <Ionicons name={mostrandoBuscador ? "close" : "search"} size={22} color={t.text} />
         </TouchableOpacity>
       </View>
 
       <View style={{ height: 50 }}>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filtersRow}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersRow}>
           {FILTROS.map(f => (
-            <TouchableOpacity
-              key={f} 
-              style={[styles.filterChip, filtro === f && styles.filterChipActive]}
-              onPress={() => setFiltro(f)}
-            >
-              <Text style={[styles.filterChipText, filtro === f && styles.filterChipTextActive]}>
-                {f}
-              </Text>
+            <TouchableOpacity key={f}
+              style={[styles.filterChip, filtro === f ? { backgroundColor: t.primary, borderColor: t.primary } : { backgroundColor: t.bg3, borderColor: t.cardBorder }]}
+              onPress={() => setFiltro(f)}>
+              <Text style={[styles.filterChipText, { color: filtro === f ? '#fff' : t.text }]}>{f}</Text>
             </TouchableOpacity>
           ))}
-          
-          <TouchableOpacity style={styles.filterChipIcon}>
-            <Ionicons name="calendar-outline" size={16} color="#374151" />
-            <Text style={[styles.filterChipText, { marginLeft: 6 }]}>Fecha</Text>
+          <TouchableOpacity style={[styles.filterChipIcon, { backgroundColor: t.bg3, borderColor: t.cardBorder }]}>
+            <Ionicons name="calendar-outline" size={16} color={t.text} />
+            <Text style={[styles.filterChipText, { marginLeft: 6, color: t.text }]}>Fecha</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
 
       <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statNum}>{citasFiltradas.length}</Text>
-          <Text style={styles.statLabel}>Total</Text>
+        <View style={[styles.statBox, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+          <Text style={[styles.statNum, { color: t.text }]}>{citasFiltradas.length}</Text>
+          <Text style={[styles.statLabel, { color: t.textMuted }]}>Total</Text>
         </View>
-        <View style={[styles.statBox, { backgroundColor: '#F0FDF4' }]}>
+        <View style={[styles.statBox, { backgroundColor: darkMode ? '#064E3B' : '#F0FDF4', borderColor: t.cardBorder }]}>
           <Text style={[styles.statNum, { color: '#10B981' }]}>{confirmadas}</Text>
-          <Text style={styles.statLabel}>Confirmadas</Text>
+          <Text style={[styles.statLabel, { color: t.textMuted }]}>Confirmadas</Text>
         </View>
-        <View style={[styles.statBox, { backgroundColor: '#FFFBEB' }]}>
+        <View style={[styles.statBox, { backgroundColor: darkMode ? '#78350F' : '#FFFBEB', borderColor: t.cardBorder }]}>
           <Text style={[styles.statNum, { color: '#F59E0B' }]}>{pendientes}</Text>
-          <Text style={styles.statLabel}>Pendientes</Text>
+          <Text style={[styles.statLabel, { color: t.textMuted }]}>Pendientes</Text>
         </View>
       </View>
 
       <FlatList
-        data={citasFiltradas}
-        keyExtractor={item => item.id}
+        data={citasFiltradas} keyExtractor={item => item.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.citaCard}
-            onPress={() => navigation.navigate('RecordatorioDeCita', { cita: item })}
-          >
+          <TouchableOpacity style={[styles.citaCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}
+            onPress={() => navigation.navigate('RecordatorioDeCita', { cita: item, darkMode })}>
             <View style={styles.citaTop}>
-              <Text style={styles.citaNombre}>{item.paciente}</Text>
-              <Text style={[
-                styles.citaEstado,
-                item.estado === 'Confirmada' ? { color: '#10B981' } : { color: '#F59E0B' }
-              ]}>
-                {item.estado}
-              </Text>
+              <Text style={[styles.citaNombre, { color: t.text }]}>{item.paciente}</Text>
+              <Text style={[styles.citaEstado, { color: item.estado === 'Confirmada' ? '#10B981' : '#F59E0B' }]}>{item.estado}</Text>
             </View>
-            <Text style={styles.citaTipo}>{item.tipo}</Text>
+            <Text style={[styles.citaTipo, { color: t.textSub }]}>{item.tipo}</Text>
             <View style={styles.citaBottom}>
-              <View style={styles.citaMeta}>
-                <Ionicons name="time-outline" size={14} color="#9CA3AF" />
-                <Text style={styles.citaMetaText}>{item.inicio} - {item.fin}</Text>
-              </View>
-              <View style={styles.citaMeta}>
-                <Ionicons name="person-circle-outline" size={14} color="#9CA3AF" />
-                <Text style={styles.citaMetaText}>{item.doctor}</Text>
-              </View>
+              <View style={styles.citaMeta}><Ionicons name="time-outline" size={14} color={t.textMuted} /><Text style={[styles.citaMetaText, { color: t.textSub }]}>{item.inicio} - {item.fin}</Text></View>
+              <View style={styles.citaMeta}><Ionicons name="person-circle-outline" size={14} color={t.textMuted} /><Text style={[styles.citaMetaText, { color: t.textSub }]}>{item.doctor}</Text></View>
             </View>
           </TouchableOpacity>
         )}
       />
 
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CrearCita')}>
+      <TouchableOpacity style={[styles.fab, { backgroundColor: t.primary }]}
+        onPress={() => navigation.navigate('CrearCita', { darkMode })}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
@@ -149,158 +105,27 @@ export default function ListaDeCitas({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFFFFF' 
-  },
-  header: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between',
-    paddingHorizontal: 16, 
-    paddingTop: 12, 
-    paddingBottom: 8,
-  },
-  menuBtn: { 
-    width: 40, 
-    height: 40 
-  },
-  title: { 
-    fontSize: 24, 
-    fontWeight: '700', 
-    color: '#111827' 
-  },
-  searchBtn: { 
-    width: 40, 
-    height: 40, 
-    alignItems: 'center', 
-    justifyContent: 'center' 
-  },
-  headerSearchInput: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginHorizontal: 8,
-    fontSize: 15,
-    color: '#111827',
-  },
-  filtersRow: { 
-    paddingLeft: 16, 
-    paddingRight: 32, 
-    gap: 8,
-    alignItems: 'center'
-  },
-  filterChip: {
-    paddingHorizontal: 16, 
-    paddingVertical: 8, 
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6', 
-    borderWidth: 1, 
-    borderColor: '#E5E7EB',
-  },
-  filterChipActive: { 
-    backgroundColor: '#2563EB', 
-    borderColor: '#2563EB' 
-  },
-  filterChipText: { 
-    fontSize: 13, 
-    fontWeight: '600', 
-    color: '#374151' 
-  },
-  filterChipTextActive: { 
-    color: '#FFFFFF' 
-  },
-  filterChipIcon: {
-    flexDirection: 'row', 
-    alignItems: 'center',
-    paddingHorizontal: 16, 
-    paddingVertical: 8, 
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6', 
-    borderWidth: 1, 
-    borderColor: '#E5E7EB',
-  },
-  statsRow: { 
-    flexDirection: 'row', 
-    marginHorizontal: 16, 
-    marginBottom: 12, 
-    marginTop: 8,
-    gap: 8 
-  },
-  statBox: {
-    flex: 1, 
-    backgroundColor: '#F9FAFB', 
-    borderRadius: 12,
-    padding: 12, 
-    alignItems: 'center', 
-    borderWidth: 1, 
-    borderColor: '#E5E7EB',
-  },
-  statNum: { 
-    fontSize: 22, 
-    fontWeight: '800', 
-    color: '#111827' 
-  },
-  statLabel: { 
-    fontSize: 11, 
-    color: '#9CA3AF', 
-    marginTop: 2 
-  },
-  citaCard: {
-    padding: 14, 
-    backgroundColor: '#fff',
-    borderRadius: 14, 
-    borderWidth: 1, 
-    borderColor: '#E5E7EB',
-  },
-  citaTop: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    marginBottom: 2 
-  },
-  citaNombre: { 
-    fontSize: 15, 
-    fontWeight: '700', 
-    color: '#111827' 
-  },
-  citaEstado: { 
-    fontSize: 13, 
-    fontWeight: '600' 
-  },
-  citaTipo: { 
-    fontSize: 13, 
-    color: '#6B7280', 
-    marginBottom: 8 
-  },
-  citaBottom: { 
-    flexDirection: 'row', 
-    gap: 16 
-  },
-  citaMeta: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 4 
-  },
-  citaMetaText: { 
-    fontSize: 12, 
-    color: '#6B7280' 
-  },
-  fab: {
-    position: 'absolute', 
-    bottom: 30, 
-    right: 20,
-    width: 56, 
-    height: 56, 
-    borderRadius: 28,
-    backgroundColor: '#2563EB', 
-    alignItems: 'center', 
-    justifyContent: 'center',
-    shadowColor: '#2563EB', 
-    shadowOpacity: 0.4, 
-    shadowRadius: 10, 
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
+  container: { flex: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
+  menuBtn: { width: 40, height: 40 },
+  title: { fontSize: 24, fontWeight: '700' },
+  searchBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerSearchInput: { flex: 1, height: 40, borderRadius: 10, paddingHorizontal: 12, marginHorizontal: 8, fontSize: 15 },
+  filtersRow: { paddingLeft: 16, paddingRight: 32, gap: 8, alignItems: 'center' },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
+  filterChipText: { fontSize: 13, fontWeight: '600' },
+  filterChipIcon: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
+  statsRow: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, marginTop: 8, gap: 8 },
+  statBox: { flex: 1, borderRadius: 12, padding: 12, alignItems: 'center', borderWidth: 1 },
+  statNum: { fontSize: 22, fontWeight: '800' },
+  statLabel: { fontSize: 11, marginTop: 2 },
+  citaCard: { padding: 14, borderRadius: 14, borderWidth: 1 },
+  citaTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
+  citaNombre: { fontSize: 15, fontWeight: '700' },
+  citaEstado: { fontSize: 13, fontWeight: '600' },
+  citaTipo: { fontSize: 13, marginBottom: 8 },
+  citaBottom: { flexDirection: 'row', gap: 16 },
+  citaMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  citaMetaText: { fontSize: 12 },
+  fab: { position: 'absolute', bottom: 30, right: 20, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 8 },
 });
