@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, Switch,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -19,7 +25,6 @@ export default function Ajustes({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Profile row */}
         <TouchableOpacity style={styles.profileRow} onPress={() => navigation.navigate('Perfil')}>
           <View style={styles.profileAvatar}>
             <Ionicons name="person" size={24} color="#9CA3AF" />
@@ -31,7 +36,6 @@ export default function Ajustes({ navigation }) {
           <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
         </TouchableOpacity>
 
-        {/* General */}
         <SectionTitle title="General" />
         <View style={styles.section}>
           <View style={styles.settingRow}>
@@ -50,10 +54,15 @@ export default function Ajustes({ navigation }) {
             />
           </View>
           <View style={styles.divider} />
-          <SettingItem icon="language-outline" iconBg="#3B82F6" label="Idioma" desc="Español" arrow />
+          <SettingItem 
+            icon="language-outline" 
+            iconBg="#3B82F6" 
+            label="Idioma" 
+            desc="Español" 
+            arrow 
+          />
         </View>
 
-        {/* Notificaciones */}
         <SectionTitle title="Notificaciones" />
         <View style={styles.section}>
           <View style={styles.settingRow}>
@@ -64,8 +73,12 @@ export default function Ajustes({ navigation }) {
               <Text style={styles.settingLabel}>Notificaciones Push</Text>
               <Text style={styles.settingDesc}>Alertas y recordatorios</Text>
             </View>
-            <Switch value={notifPush} onValueChange={setNotifPush}
-              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}  />
+            <Switch 
+              value={notifPush} 
+              onValueChange={setNotifPush}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}
+              ios_backgroundColor="#E5E7EB" 
+            />
           </View>
           <View style={styles.divider} />
           <View style={styles.settingRow}>
@@ -76,8 +89,12 @@ export default function Ajustes({ navigation }) {
               <Text style={styles.settingLabel}>Recordatorios de Citas</Text>
               <Text style={styles.settingDesc}>30 min antes de cada cita</Text>
             </View>
-            <Switch value={notifCitas} onValueChange={setNotifCitas}
-              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}  />
+            <Switch 
+              value={notifCitas} 
+              onValueChange={setNotifCitas}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}
+              ios_backgroundColor="#E5E7EB" 
+            />
           </View>
           <View style={styles.divider} />
           <View style={styles.settingRow}>
@@ -88,18 +105,20 @@ export default function Ajustes({ navigation }) {
               <Text style={styles.settingLabel}>Notificaciones por Email</Text>
               <Text style={styles.settingDesc}>Resúmenes diarios</Text>
             </View>
-            <Switch value={notifEmail} onValueChange={setNotifEmail}
-              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}  />
+            <Switch 
+              value={notifEmail} 
+              onValueChange={setNotifEmail}
+              trackColor={{ false: '#E5E7EB', true: '#2563EB' }}
+              ios_backgroundColor="#E5E7EB" 
+            />
           </View>
         </View>
 
-        {/* Seguridad */}
         <SectionTitle title="Seguridad" />
         <View style={styles.section}>
           <SettingItem icon="lock-closed" iconBg="#6B7280" label="Cambiar Contraseña" arrow />
         </View>
 
-        {/* Soporte */}
         <SectionTitle title="Soporte" />
         <View style={styles.section}>
           <SettingItem icon="help-circle" iconBg="#3B82F6" label="Centro de Ayuda" arrow />
@@ -110,11 +129,6 @@ export default function Ajustes({ navigation }) {
           <View style={styles.divider} />
           <SettingItem icon="document-text" iconBg="#374151" label="Términos y Condiciones" arrow />
         </View>
-
-        <TouchableOpacity style={styles.logoutBtn}>
-          <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutText}>Cerrar Sesión</Text>
-        </TouchableOpacity>
 
         <Text style={styles.version}>Versión 1.2.4</Text>
       </ScrollView>
@@ -142,40 +156,102 @@ function SettingItem({ icon, iconBg, label, desc, arrow }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
-  title: { fontSize: 26, fontWeight: '800', color: '#111827' },
-  scroll: { paddingHorizontal: 16, paddingBottom: 40 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F9FAFB' 
+  },
+  header: { 
+    paddingHorizontal: 20, 
+    paddingTop: 16, 
+    paddingBottom: 12 
+  },
+  title: { 
+    fontSize: 26, 
+    fontWeight: '800', 
+    color: '#111827' 
+  },
+  scroll: { 
+    paddingHorizontal: 16, 
+    paddingBottom: 40 
+  },
   profileRow: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14,
-    padding: 14, marginBottom: 20,
-    borderWidth: 1, borderColor: '#E5E7EB',
+    flexDirection: 'row', 
+    alignItems: 'center',
+    backgroundColor: '#fff', 
+    borderRadius: 14,
+    padding: 14, 
+    marginBottom: 20,
+    borderWidth: 1, 
+    borderColor: '#E5E7EB',
   },
   profileAvatar: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center', marginRight: 12,
+    width: 48, 
+    height: 48, 
+    borderRadius: 24,
+    backgroundColor: '#F3F4F6', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginRight: 12,
   },
-  profileName: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  profileRole: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: '#9CA3AF', textTransform: 'uppercase', marginBottom: 6, marginTop: 4, letterSpacing: 0.5 },
-  section: {
-    backgroundColor: '#fff', borderRadius: 14,
-    marginBottom: 16, borderWidth: 1, borderColor: '#E5E7EB',
-    overflow: 'hidden',
+  profileName: { 
+    fontSize: 16, 
+    fontWeight: '700', 
+    color: '#111827' 
   },
-  settingRow: { flexDirection: 'row', alignItems: 'center', padding: 14 },
-  settingIcon: {
-    width: 34, height: 34, borderRadius: 10,
-    alignItems: 'center', justifyContent: 'center', marginRight: 12,
+  profileRole: { 
+    fontSize: 13, 
+    color: '#6B7280', 
+    marginTop: 2 
   },
-  settingLabel: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  settingDesc: { fontSize: 12, color: '#9CA3AF', marginTop: 1 },
-  divider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 60 },
-  logoutBtn: {
-    height: 52, backgroundColor: '#EF4444', borderRadius: 14,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8,
+  sectionTitle: { 
+    fontSize: 12, 
+    fontWeight: '700', 
+    color: '#9CA3AF', 
+    textTransform: 'uppercase', 
+    marginBottom: 6, 
+    marginTop: 4, 
+    letterSpacing: 0.5 
   },
-  logoutText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  version: { textAlign: 'center', color: '#9CA3AF', fontSize: 12, marginTop: 16 },
+  section: { 
+    backgroundColor: '#fff', 
+    borderRadius: 14, 
+    marginBottom: 16, 
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    overflow: 'hidden' 
+  },
+  settingRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 14 
+  },
+  settingIcon: { 
+    width: 34, 
+    height: 34, 
+    borderRadius: 10, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginRight: 12 
+  },
+  settingLabel: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: '#111827' 
+  },
+  settingDesc: { 
+    fontSize: 12, 
+    color: '#9CA3AF', 
+    marginTop: 1 
+  },
+  divider: { 
+    height: 1, 
+    backgroundColor: '#F3F4F6', 
+    marginLeft: 60 
+  },
+  version: { 
+    textAlign: 'center', 
+    color: '#9CA3AF', 
+    fontSize: 12, 
+    marginTop: 16 
+  },
 });

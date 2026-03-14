@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import {
-  View, Text, FlatList, TextInput, TouchableOpacity,
-  StyleSheet, StatusBar, SafeAreaView,
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -23,18 +29,34 @@ const estadoConfig = {
 
 export default function ListaDePacientes({ navigation }) {
   const [search, setSearch] = useState('');
-  const filtered = PACIENTES.filter(p =>
-    p.nombre.toLowerCase().includes(search.toLowerCase())
+  const [filtroEstado, setFiltroEstado] = useState('Todos');
+
+  const cambiarFiltro = () => {
+    const opciones = ['Todos', 'Activo', 'Pendiente', 'Urgente'];
+    const indiceActual = opciones.indexOf(filtroEstado);
+    const siguienteIndice = (indiceActual + 1) % opciones.length;
+    setFiltroEstado(opciones[siguienteIndice]);
+  };
+
+  const filtered = PACIENTES.filter(p => {
+    const coincideTexto = p.nombre.toLowerCase().includes(search.toLowerCase());
+    const coincideFiltro = filtroEstado === 'Todos' ? true : p.estado === filtroEstado;
+    return coincideTexto && coincideFiltro;
+  });
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="people-outline" size={48} color="#D1D5DB" />
+      <Text style={styles.emptyText}>No se encontraron pacientes</Text>
+    </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
+      
       <View style={styles.header}>
         <Text style={styles.title}>Pacientes</Text>
-        <TouchableOpacity style={styles.bellBtn}>
-          <Ionicons name="notifications" size={22} color="#374151" />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.searchContainer}>
@@ -49,10 +71,13 @@ export default function ListaDePacientes({ navigation }) {
       </View>
 
       <View style={styles.statsRow}>
-        <Text style={styles.statsText}>Total: {PACIENTES.length} pacientes</Text>
-        <TouchableOpacity style={styles.filterBtn}>
+        <Text style={styles.statsText}>Mostrando: {filtered.length} pacientes</Text>
+        
+        <TouchableOpacity style={styles.filterBtn} onPress={cambiarFiltro}>
           <Ionicons name="funnel" size={14} color="#2563EB" />
-          <Text style={styles.filterText}>Filtros</Text>
+          <Text style={styles.filterText}>
+            Filtros {filtroEstado !== 'Todos' ? `(${filtroEstado})` : ''}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -61,6 +86,7 @@ export default function ListaDePacientes({ navigation }) {
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={renderEmptyState}
         renderItem={({ item }) => {
           const config = estadoConfig[item.estado];
           return (
@@ -99,54 +125,139 @@ export default function ListaDePacientes({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16,
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FFFFFF' 
   },
-  title: { fontSize: 26, fontWeight: '700', color: '#111827' },
-  bellBtn: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center',
+  header: {
+    paddingHorizontal: 20, 
+    paddingTop: 12, 
+    paddingBottom: 16,
+  },
+  title: { 
+    fontSize: 26, 
+    fontWeight: '700', 
+    color: '#111827' 
   },
   searchContainer: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#F3F4F6', borderRadius: 12,
-    marginHorizontal: 16, paddingHorizontal: 14, height: 46, marginBottom: 12,
+    flexDirection: 'row', 
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6', 
+    borderRadius: 12,
+    marginHorizontal: 16, 
+    paddingHorizontal: 14, 
+    height: 46, 
+    marginBottom: 12,
   },
-  searchInput: { flex: 1, fontSize: 14, color: '#111827' },
+  searchInput: { 
+    flex: 1, 
+    fontSize: 14, 
+    color: '#111827' 
+  },
   statsRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingHorizontal: 20, marginBottom: 8,
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    marginBottom: 8,
   },
-  statsText: { fontSize: 13, color: '#6B7280' },
-  filterBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  filterText: { color: '#2563EB', fontSize: 13, fontWeight: '600' },
-  separator: { height: 1, backgroundColor: '#F3F4F6', marginVertical: 2 },
+  statsText: { 
+    fontSize: 13, 
+    color: '#6B7280' 
+  },
+  filterBtn: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 4 
+  },
+  filterText: { 
+    color: '#2563EB', 
+    fontSize: 13, 
+    fontWeight: '600' 
+  },
+  separator: { 
+    height: 1, 
+    backgroundColor: '#F3F4F6', 
+    marginVertical: 2 
+  },
   card: {
-    flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'row', 
+    alignItems: 'center',
     paddingVertical: 14,
   },
   avatar: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center', marginRight: 12,
+    width: 48, 
+    height: 48, 
+    borderRadius: 24,
+    backgroundColor: '#2563EB', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginRight: 12,
   },
-  avatarText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  info: { flex: 1 },
-  nombre: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 2 },
-  cita: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
+  avatarText: { 
+    color: '#fff', 
+    fontWeight: '700', 
+    fontSize: 14 
+  },
+  info: { 
+    flex: 1 
+  },
+  nombre: { 
+    fontSize: 15, 
+    fontWeight: '700', 
+    color: '#111827', 
+    marginBottom: 2 
+  },
+  cita: { 
+    fontSize: 12, 
+    color: '#6B7280', 
+    marginBottom: 6 
+  },
   estadoBadge: {
-    flexDirection: 'row', alignItems: 'center',
-    alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20,
+    flexDirection: 'row', 
+    alignItems: 'center',
+    alignSelf: 'flex-start', 
+    paddingHorizontal: 8, 
+    paddingVertical: 3, 
+    borderRadius: 20,
   },
-  estadoText: { fontSize: 11, fontWeight: '600' },
-  rightSide: { alignItems: 'flex-end', gap: 8 },
-  edad: { fontSize: 13, color: '#6B7280' },
+  estadoText: { 
+    fontSize: 11, 
+    fontWeight: '600' 
+  },
+  rightSide: { 
+    alignItems: 'flex-end', 
+    gap: 8 
+  },
+  edad: { 
+    fontSize: 13, 
+    color: '#6B7280' 
+  },
   fab: {
-    position: 'absolute', bottom: 80, right: 20,
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#2563EB', shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 },
+    position: 'absolute', 
+    bottom: 30, 
+    right: 20,
+    width: 56, 
+    height: 56, 
+    borderRadius: 28,
+    backgroundColor: '#2563EB', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    shadowColor: '#2563EB', 
+    shadowOpacity: 0.4, 
+    shadowRadius: 10, 
+    shadowOffset: { width: 0, height: 4 },
     elevation: 8,
   },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: '#9CA3AF',
+    fontWeight: '500'
+  }
 });

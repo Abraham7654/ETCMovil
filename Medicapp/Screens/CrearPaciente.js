@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, SafeAreaView, StatusBar,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -32,7 +38,6 @@ export default function CrearPaciente({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        {/* Avatar */}
         <View style={styles.avatarContainer}>
           <View style={styles.avatarCircle}>
             <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
@@ -42,11 +47,22 @@ export default function CrearPaciente({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <Field label="Nombre Completo" value={nombre} onChangeText={setNombre} placeholder="Ingrese el nombre completo" />
+        <Field 
+          label="Nombre Completo" 
+          value={nombre} 
+          onChangeText={setNombre} 
+          placeholder="Ingrese el nombre completo" 
+        />
 
         <View style={styles.row}>
           <View style={{ flex: 1, marginRight: 8 }}>
-            <Field label="Edad" value={edad} onChangeText={setEdad} placeholder="Edad" keyboardType="numeric" />
+            <Field 
+              label="Edad" 
+              value={edad} 
+              onChangeText={setEdad} 
+              placeholder="Edad" 
+              keyboardType="numeric" 
+            />
           </View>
           <View style={{ flex: 1, marginLeft: 8 }}>
             <Text style={styles.label}>Género</Text>
@@ -59,8 +75,11 @@ export default function CrearPaciente({ navigation }) {
             {showGenero && (
               <View style={styles.dropdownMenu}>
                 {GENEROS.map(g => (
-                  <TouchableOpacity key={g} style={styles.dropdownItem}
-                    onPress={() => { setGenero(g); setShowGenero(false); }}>
+                  <TouchableOpacity 
+                    key={g} 
+                    style={styles.dropdownItem}
+                    onPress={() => { setGenero(g); setShowGenero(false); }}
+                  >
                     <Text style={styles.dropdownItemText}>{g}</Text>
                   </TouchableOpacity>
                 ))}
@@ -72,17 +91,27 @@ export default function CrearPaciente({ navigation }) {
         <Text style={styles.label}>Teléfono</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="call-outline" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
-          <TextInput style={styles.input} placeholder="+52 123 456 7890"
-            placeholderTextColor="#9CA3AF" value={telefono} onChangeText={setTelefono}
-            keyboardType="phone-pad" />
+          <TextInput 
+            style={styles.input} 
+            placeholder="+52 123 456 7890"
+            placeholderTextColor="#9CA3AF" 
+            value={telefono} 
+            onChangeText={setTelefono}
+            keyboardType="phone-pad" 
+          />
         </View>
 
         <Text style={styles.label}>Contacto de Emergencia</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="people-outline" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
-          <TextInput style={styles.input} placeholder="Teléfono de emergencia"
-            placeholderTextColor="#9CA3AF" value={emergencia} onChangeText={setEmergencia}
-            keyboardType="phone-pad" />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Teléfono de emergencia"
+            placeholderTextColor="#9CA3AF" 
+            value={emergencia} 
+            onChangeText={setEmergencia}
+            keyboardType="phone-pad" 
+          />
         </View>
 
         <Text style={styles.label}>Tipo de Sangre</Text>
@@ -95,8 +124,11 @@ export default function CrearPaciente({ navigation }) {
         {showSangre && (
           <View style={styles.dropdownMenu}>
             {SANGRE.map(s => (
-              <TouchableOpacity key={s} style={styles.dropdownItem}
-                onPress={() => { setSangre(s); setShowSangre(false); }}>
+              <TouchableOpacity 
+                key={s} 
+                style={styles.dropdownItem}
+                onPress={() => { setSangre(s); setShowSangre(false); }}
+              >
                 <Text style={styles.dropdownItemText}>{s}</Text>
               </TouchableOpacity>
             ))}
@@ -143,7 +175,7 @@ export default function CrearPaciente({ navigation }) {
 
 function Field({ label, value, onChangeText, placeholder, keyboardType }) {
   return (
-    <>
+    <View>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
@@ -155,66 +187,167 @@ function Field({ label, value, onChangeText, placeholder, keyboardType }) {
           keyboardType={keyboardType || 'default'}
         />
       </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FFFFFF' 
   },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
-  scroll: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
-  avatarContainer: { alignItems: 'center', marginBottom: 24 },
+  header: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    paddingHorizontal: 16, 
+    paddingVertical: 12,
+    borderBottomWidth: 1, 
+    borderBottomColor: '#F3F4F6',
+  },
+  backBtn: { 
+    width: 40, 
+    height: 40, 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  headerTitle: { 
+    fontSize: 18, 
+    fontWeight: '700', 
+    color: '#111827' 
+  },
+  scroll: { 
+    paddingHorizontal: 20, 
+    paddingTop: 20, 
+    paddingBottom: 40 
+  },
+  avatarContainer: { 
+    alignItems: 'center', 
+    marginBottom: 24 
+  },
   avatarCircle: {
-    width: 96, height: 96, borderRadius: 48,
-    backgroundColor: '#F3F4F6', borderWidth: 2, borderColor: '#E5E7EB',
-    borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
+    width: 96, 
+    height: 96, 
+    borderRadius: 48,
+    backgroundColor: '#F3F4F6', 
+    borderWidth: 2, 
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed', 
+    alignItems: 'center', 
+    justifyContent: 'center',
   },
   addAvatarBtn: {
-    position: 'absolute', bottom: 0, right: '35%',
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', 
+    bottom: 0, 
+    right: '35%',
+    width: 28, 
+    height: 28, 
+    borderRadius: 14,
+    backgroundColor: '#2563EB', 
+    alignItems: 'center', 
+    justifyContent: 'center',
   },
-  row: { flexDirection: 'row' },
-  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8, marginTop: 4 },
+  row: { 
+    flexDirection: 'row' 
+  },
+  label: { 
+    fontSize: 13, 
+    fontWeight: '600', 
+    color: '#374151', 
+    marginBottom: 8, 
+    marginTop: 4 
+  },
   inputContainer: {
-    flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
-    paddingHorizontal: 14, height: 48, marginBottom: 4, backgroundColor: '#FAFAFA',
+    flexDirection: 'row', 
+    alignItems: 'center',
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    borderRadius: 10,
+    paddingHorizontal: 14, 
+    height: 48, 
+    marginBottom: 4, 
+    backgroundColor: '#FAFAFA',
   },
-  input: { flex: 1, fontSize: 14, color: '#111827' },
+  input: { 
+    flex: 1, 
+    fontSize: 14, 
+    color: '#111827' 
+  },
   dropdown: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
-    paddingHorizontal: 14, height: 48, backgroundColor: '#FAFAFA', marginBottom: 4,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    borderRadius: 10,
+    paddingHorizontal: 14, 
+    height: 48, 
+    backgroundColor: '#FAFAFA', 
+    marginBottom: 4,
   },
-  dropdownText: { fontSize: 14, color: '#111827' },
+  dropdownText: { 
+    fontSize: 14, 
+    color: '#111827' 
+  },
   dropdownMenu: {
-    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
-    backgroundColor: '#fff', marginBottom: 8,
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    borderRadius: 10,
+    backgroundColor: '#fff', 
+    marginBottom: 8,
   },
-  dropdownItem: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
-  dropdownItemText: { fontSize: 14, color: '#374151' },
+  dropdownItem: { 
+    paddingHorizontal: 14, 
+    paddingVertical: 12, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#F3F4F6' 
+  },
+  dropdownItemText: { 
+    fontSize: 14, 
+    color: '#374151' 
+  },
   textArea: {
-    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10,
-    padding: 12, fontSize: 14, color: '#111827',
-    backgroundColor: '#FAFAFA', minHeight: 90, marginBottom: 4,
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    borderRadius: 10,
+    padding: 12, 
+    fontSize: 14, 
+    color: '#111827',
+    backgroundColor: '#FAFAFA', 
+    minHeight: 90, 
+    marginBottom: 4,
   },
-  buttons: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  buttons: { 
+    flexDirection: 'row', 
+    gap: 12, 
+    marginTop: 24 
+  },
   cancelBtn: {
-    flex: 1, height: 50, borderRadius: 12,
-    borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
+    flex: 1, 
+    height: 50, 
+    borderRadius: 12,
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    alignItems: 'center', 
+    justifyContent: 'center',
   },
-  cancelText: { fontSize: 15, color: '#374151', fontWeight: '600' },
+  cancelText: { 
+    fontSize: 15, 
+    color: '#374151', 
+    fontWeight: '600' 
+  },
   saveBtn: {
-    flex: 2, height: 50, borderRadius: 12,
-    backgroundColor: '#2563EB', flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'center',
+    flex: 2, 
+    height: 50, 
+    borderRadius: 12,
+    backgroundColor: '#2563EB', 
+    flexDirection: 'row',
+    alignItems: 'center', 
+    justifyContent: 'center',
   },
-  saveText: { fontSize: 15, color: '#fff', fontWeight: '700' },
+  saveText: { 
+    fontSize: 15, 
+    color: '#fff', 
+    fontWeight: '700' 
+  },
 });
