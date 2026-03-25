@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 const TABS = ['Historial', 'Citas', 'Fotos', 'Notas', 'Signos Vitales'];
 const historial = [
@@ -10,8 +10,7 @@ const historial = [
 ];
 
 export default function HistorialPaciente({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [activeTab, setActiveTab] = useState('Historial');
   const paciente = route?.params?.paciente || { id: 1, nombre: 'María González', edad: 42, sexo: 'Femenino', estado: 'Activo' };
 
@@ -88,7 +87,7 @@ export default function HistorialPaciente({ navigation, route }) {
 
           {activeTab === 'Notas' && (
             <TouchableOpacity style={[styles.actionCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}
-              onPress={() => navigation.navigate('NotasPaciente', { paciente, darkMode })}>
+              onPress={() => navigation.navigate('NotasPaciente')}>
               <View style={[styles.actionIconBox, { backgroundColor: darkMode ? '#1E3A5F' : '#EFF6FF' }]}>
                 <Ionicons name="document-text-outline" size={24} color={t.primary} />
               </View>
@@ -103,7 +102,7 @@ export default function HistorialPaciente({ navigation, route }) {
           {activeTab === 'Signos Vitales' && (
             <>
               <TouchableOpacity style={[styles.newSignosBtn, { backgroundColor: t.primary }]}
-                onPress={() => navigation.navigate('SignosVitales', { paciente, darkMode })}>
+                onPress={() => navigation.navigate('SignosVitales')}>
                 <Ionicons name="add-circle-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
                 <Text style={styles.newSignosBtnText}>Registrar Signos Vitales</Text>
               </TouchableOpacity>

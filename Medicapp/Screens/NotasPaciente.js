@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 export default function NotasPaciente({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [notas, setNotas] = useState('');
   const STATS = [{ label: 'Última Cita', val: '15 Ene', blue: false },{ label: 'Próxima', val: '22 Ene', blue: true },{ label: 'Total Citas', val: '24', blue: false }];
   const TABS = ['Historial', 'Citas', 'Fotos', 'Notas'];

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 const FILTROS = ['Hoy', 'Mañana', 'Esta Semana'];
 const CITAS = [
@@ -14,8 +14,7 @@ const CITAS = [
 ];
 
 export default function ListaDeCitas({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [filtro, setFiltro] = useState('Hoy');
   const [busqueda, setBusqueda] = useState('');
   const [mostrandoBuscador, setMostrandoBuscador] = useState(false);
@@ -82,7 +81,7 @@ export default function ListaDeCitas({ navigation, route }) {
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         renderItem={({ item }) => (
           <TouchableOpacity style={[styles.citaCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}
-            onPress={() => navigation.navigate('RecordatorioDeCita', { cita: item, darkMode })}>
+            onPress={() => navigation.navigate('RecordatorioDeCita')}>
             <View style={styles.citaTop}>
               <Text style={[styles.citaNombre, { color: t.text }]}>{item.paciente}</Text>
               <Text style={[styles.citaEstado, { color: item.estado === 'Confirmada' ? '#10B981' : '#F59E0B' }]}>{item.estado}</Text>
@@ -97,7 +96,7 @@ export default function ListaDeCitas({ navigation, route }) {
       />
 
       <TouchableOpacity style={[styles.fab, { backgroundColor: t.primary }]}
-        onPress={() => navigation.navigate('CrearCita', { darkMode })}>
+        onPress={() => navigation.navigate('CrearCita')}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>

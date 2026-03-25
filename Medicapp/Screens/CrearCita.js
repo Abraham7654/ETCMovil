@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 const HORAS = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
 
 export default function CrearCita({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [doctor, setDoctor] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');

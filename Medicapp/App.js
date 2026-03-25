@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { themeStore } from './store/themeStore';
 import { lightTheme, darkTheme } from './theme/theme';
 
 import InicioDeSesion from './screens/InicioDeSesion';
@@ -20,43 +21,47 @@ import Perfil from './screens/Perfil';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// darkMode y toggleDark se pasan como initialParams a cada stack
-function PacientesStack({ route }) {
-  const { darkMode, toggleDark } = route?.params || {};
+function PacientesStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ListaDePacientes" component={ListaDePacientes} initialParams={{ darkMode, toggleDark }} />
-      <Stack.Screen name="CrearPaciente" component={CrearPaciente} initialParams={{ darkMode }} />
-      <Stack.Screen name="HistorialPaciente" component={HistorialPaciente} initialParams={{ darkMode }} />
-      <Stack.Screen name="NotasPaciente" component={NotasPaciente} initialParams={{ darkMode }} />
-      <Stack.Screen name="SignosVitales" component={SignosVitales} initialParams={{ darkMode }} />
+      <Stack.Screen name="ListaDePacientes" component={ListaDePacientes} />
+      <Stack.Screen name="CrearPaciente" component={CrearPaciente} />
+      <Stack.Screen name="HistorialPaciente" component={HistorialPaciente} />
+      <Stack.Screen name="NotasPaciente" component={NotasPaciente} />
+      <Stack.Screen name="SignosVitales" component={SignosVitales} />
     </Stack.Navigator>
   );
 }
 
-function CitasStack({ route }) {
-  const { darkMode } = route?.params || {};
+function CitasStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ListaDeCitas" component={ListaDeCitas} initialParams={{ darkMode }} />
-      <Stack.Screen name="CrearCita" component={CrearCita} initialParams={{ darkMode }} />
-      <Stack.Screen name="RecordatorioDeCita" component={RecordatorioDeCita} initialParams={{ darkMode }} />
+      <Stack.Screen name="ListaDeCitas" component={ListaDeCitas} />
+      <Stack.Screen name="CrearCita" component={CrearCita} />
+      <Stack.Screen name="RecordatorioDeCita" component={RecordatorioDeCita} />
     </Stack.Navigator>
   );
 }
 
-function AjustesStack({ route }) {
-  const { darkMode, toggleDark } = route?.params || {};
+function AjustesStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Ajustes" component={Ajustes} initialParams={{ darkMode, toggleDark }} />
-      <Stack.Screen name="Perfil" component={Perfil} initialParams={{ darkMode }} />
+      <Stack.Screen name="Ajustes" component={Ajustes} />
+      <Stack.Screen name="Perfil" component={Perfil} />
     </Stack.Navigator>
   );
 }
 
-function MainTabs({ darkMode, toggleDark }) {
+function MainTabs() {
+  // Tab bar también reacciona al cambio de tema
+  const [darkMode, setDarkMode] = useState(themeStore.getDarkMode());
   const t = darkMode ? darkTheme : lightTheme;
+
+  useEffect(() => {
+    const unsub = themeStore.subscribe(setDarkMode);
+    return unsub;
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -80,30 +85,19 @@ function MainTabs({ darkMode, toggleDark }) {
         },
       })}
     >
-      <Tab.Screen name="PacientesTab" options={{ title: 'Pacientes' }}>
-        {(props) => <PacientesStack {...props} route={{ ...props.route, params: { darkMode, toggleDark } }} />}
-      </Tab.Screen>
-      <Tab.Screen name="CitasTab" options={{ title: 'Citas' }}>
-        {(props) => <CitasStack {...props} route={{ ...props.route, params: { darkMode } }} />}
-      </Tab.Screen>
-      <Tab.Screen name="AjustesTab" options={{ title: 'Ajustes' }}>
-        {(props) => <AjustesStack {...props} route={{ ...props.route, params: { darkMode, toggleDark } }} />}
-      </Tab.Screen>
+      <Tab.Screen name="PacientesTab" component={PacientesStack} options={{ title: 'Pacientes' }} />
+      <Tab.Screen name="CitasTab" component={CitasStack} options={{ title: 'Citas' }} />
+      <Tab.Screen name="AjustesTab" component={AjustesStack} options={{ title: 'Ajustes' }} />
     </Tab.Navigator>
   );
 }
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(false);
-  const toggleDark = () => setDarkMode(prev => !prev);
-
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="InicioDeSesion" component={InicioDeSesion} />
-        <Stack.Screen name="Main">
-          {() => <MainTabs darkMode={darkMode} toggleDark={toggleDark} />}
-        </Stack.Screen>
+        <Stack.Screen name="Main" component={MainTabs} />
       </Stack.Navigator>
     </NavigationContainer>
   );

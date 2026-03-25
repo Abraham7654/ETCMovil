@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 export default function Ajustes({ navigation, route }) {
-  const { darkMode, toggleDark } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t, toggleDark } = useTheme();
 
   const [notifPush, setNotifPush] = useState(true);
   const [notifCitas, setNotifCitas] = useState(true);
@@ -21,7 +20,7 @@ export default function Ajustes({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         <TouchableOpacity
           style={[styles.profileRow, { backgroundColor: t.card, borderColor: t.cardBorder }]}
-          onPress={() => navigation.navigate('Perfil', { darkMode })}
+          onPress={() => navigation.navigate('Perfil')}
         >
           <View style={[styles.profileAvatar, { backgroundColor: t.bg3 }]}>
             <Ionicons name="person" size={24} color={t.textMuted} />

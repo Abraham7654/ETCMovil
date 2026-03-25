@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 export default function Perfil({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [twoFactor, setTwoFactor] = useState(true);
 
   return (

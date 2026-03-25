@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView, Switch, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 export default function RecordatorioDeCita({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [r15min, setR15min] = useState(true);
   const [r1hora, setR1hora] = useState(false);
   const [r1dia, setR1dia] = useState(false);

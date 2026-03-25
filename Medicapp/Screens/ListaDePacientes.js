@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { useTheme } from '../store/useTheme';
 
 const PACIENTES = [
   { id: '1', nombre: 'María González', edad: 45, ultimaCita: '15 Ene 2024', estado: 'Activo', initials: 'MG' },
@@ -20,8 +20,7 @@ const estadoConfig = {
 };
 
 export default function ListaDePacientes({ navigation, route }) {
-  const { darkMode } = route?.params || {};
-  const t = darkMode ? darkTheme : lightTheme;
+  const { darkMode, t } = useTheme();
   const [search, setSearch] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('Todos');
 
@@ -76,7 +75,7 @@ export default function ListaDePacientes({ navigation, route }) {
           const config = estadoConfig[item.estado];
           return (
             <TouchableOpacity style={styles.card}
-              onPress={() => navigation.navigate('HistorialPaciente', { paciente: item, darkMode })}>
+              onPress={() => navigation.navigate('HistorialPaciente')}>
               <View style={[styles.avatar, { backgroundColor: t.primary }]}>
                 <Text style={styles.avatarText}>{item.initials}</Text>
               </View>
@@ -98,7 +97,7 @@ export default function ListaDePacientes({ navigation, route }) {
       />
 
       <TouchableOpacity style={[styles.fab, { backgroundColor: t.primary }]}
-        onPress={() => navigation.navigate('CrearPaciente', { darkMode })}>
+        onPress={() => navigation.navigate('CrearPaciente')}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
