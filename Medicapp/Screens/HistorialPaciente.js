@@ -1,18 +1,42 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, StatusBar } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View, Text, TouchableOpacity, StyleSheet, ScrollView,
+  SafeAreaView, StatusBar, ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../store/useTheme';
+import { getCitasPaciente } from '../controllers/CitaController';
+import { getUltimosSignos } from '../controllers/SignosVitalesController';
 
 const TABS = ['Historial', 'Citas', 'Fotos', 'Notas', 'Signos Vitales'];
-const historial = [
-  { id: '1', tipo: 'Consulta General', fecha: '15 Ene 2024', descripcion: 'Dolor de cabeza persistente. Prescripción de analgésicos.', doctor: 'Dr. Rodríguez', iconBg: '#DBEAFE', iconColor: '#2563EB', icon: 'medical' },
-  { id: '2', tipo: 'Chequeo Anual', fecha: '10 Dic 2023', descripcion: 'Examen físico completo. Resultados normales.', doctor: 'Dr. López', iconBg: '#D1FAE5', iconColor: '#10B981', icon: 'heart' },
-];
 
 export default function HistorialPaciente({ navigation, route }) {
   const { darkMode, t } = useTheme();
+  const paciente = route?.params?.paciente;
   const [activeTab, setActiveTab] = useState('Historial');
-  const paciente = route?.params?.paciente || { id: 1, nombre: 'María González', edad: 42, sexo: 'Femenino', estado: 'Activo' };
+  const [citas, setCitas] = useState([]);
+  const [signosUltimos, setSignosUltimos] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useFocusEffect(useCallback(() => {
+    if (paciente?.id) {
+      cargarDatos();
+    }
+  }, [paciente?.id]));
+
+  const cargarDatos = async () => {
+    setLoading(true);
+    const [resCitas, resSignos] = await Promise.all([
+      getCitasPaciente(paciente.id),
+      getUltimosSignos(paciente.id),
+    ]);
+    if (resCitas.success) setCitas(resCitas.citas);
+    if (resSignos.success) setSignosUltimos(resSignos.signos);
+    setLoading(false);
+  };
+
+  if (!paciente) return null;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
@@ -28,6 +52,7 @@ export default function HistorialPaciente({ navigation, route }) {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Tarjeta paciente */}
         <View style={[styles.patientCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
           <View style={[styles.patientAvatar, { backgroundColor: t.bg3 }]}>
             <Ionicons name="person" size={28} color={t.textMuted} />
@@ -39,12 +64,17 @@ export default function HistorialPaciente({ navigation, route }) {
           </View>
           <View style={styles.patientMeta}>
             <Text style={[styles.ageText, { color: t.text }]}>{paciente.edad} años</Text>
-            <Text style={[styles.generoText, { color: t.textSub }]}>{paciente.sexo || paciente.genero || 'Femenino'}</Text>
+            <Text style={[styles.generoText, { color: t.textSub }]}>{paciente.genero || 'N/D'}</Text>
           </View>
         </View>
 
+        {/* Stats */}
         <View style={styles.statsRow}>
-          {[['Última Cita','15 Ene',false],['Próxima','22 Ene',true],['Total Citas','24',false]].map(([label,val,blue])=>(
+          {[
+            ['Citas', citas.length.toString(), false],
+            ['Tipo Sangre', paciente.tipo_sangre || 'N/D', false],
+            ['Estado', paciente.estado || 'Activo', true],
+          ].map(([label, val, blue]) => (
             <View key={label} style={[styles.statBox, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
               <Text style={[styles.statLabel, { color: t.textMuted }]}>{label}</Text>
               <Text style={[styles.statValue, { color: blue ? t.primary : t.text }]}>{val}</Text>
@@ -52,6 +82,7 @@ export default function HistorialPaciente({ navigation, route }) {
           ))}
         </View>
 
+        {/* Tabs scrollables */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContainer}>
           {TABS.map(tab => (
             <TouchableOpacity key={tab}
@@ -62,32 +93,73 @@ export default function HistorialPaciente({ navigation, route }) {
           ))}
         </ScrollView>
 
+        {loading && <ActivityIndicator color={t.primary} style={{ marginTop: 20 }} />}
+
         <View style={{ paddingHorizontal: 16 }}>
-          {activeTab === 'Historial' && historial.map(item => (
-            <View key={item.id} style={[styles.historialCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-              <View style={[styles.historialIcon, { backgroundColor: item.iconBg }]}>
-                <Ionicons name={item.icon} size={18} color={item.iconColor} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={styles.historialHeader}>
-                  <Text style={[styles.historialTipo, { color: t.text }]}>{item.tipo}</Text>
-                  <Text style={[styles.historialFecha, { color: t.textMuted }]}>{item.fecha}</Text>
+          {/* HISTORIAL */}
+          {activeTab === 'Historial' && (
+            citas.length === 0 ? (
+              <EmptyState icon="document-text-outline" text="Sin historial médico aún" t={t} />
+            ) : (
+              citas.slice(0, 5).map(item => (
+                <View key={item.id} style={[styles.historialCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+                  <View style={[styles.historialIcon, { backgroundColor: '#DBEAFE' }]}>
+                    <Ionicons name="medical" size={18} color="#2563EB" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.historialHeader}>
+                      <Text style={[styles.historialTipo, { color: t.text }]}>{item.motivo || 'Consulta'}</Text>
+                      <Text style={[styles.historialFecha, { color: t.textMuted }]}>{item.fecha}</Text>
+                    </View>
+                    <Text style={[styles.historialDesc, { color: t.textSub }]}>
+                      {item.estado} · {item.hora}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                      <Ionicons name="person-circle-outline" size={14} color={t.textMuted} />
+                      <Text style={[styles.historialDoctor, { color: t.textMuted }]}>{item.doctor}</Text>
+                    </View>
+                  </View>
                 </View>
-                <Text style={[styles.historialDesc, { color: t.textSub }]}>{item.descripcion}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
-                  <Ionicons name="person-circle-outline" size={14} color={t.textMuted} />
-                  <Text style={[styles.historialDoctor, { color: t.textMuted }]}>{item.doctor}</Text>
-                </View>
-              </View>
-            </View>
-          ))}
+              ))
+            )
+          )}
 
-          {activeTab === 'Citas' && <EmptyState icon="calendar-outline" text="Sin citas registradas" t={t} />}
-          {activeTab === 'Fotos' && <EmptyState icon="folder-open-outline" text="Sin contenido aún" t={t} />}
+          {/* CITAS */}
+          {activeTab === 'Citas' && (
+            citas.length === 0 ? (
+              <EmptyState icon="calendar-outline" text="Sin citas registradas" t={t} />
+            ) : (
+              citas.map(item => (
+                <TouchableOpacity key={item.id}
+                  style={[styles.historialCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}
+                  onPress={() => navigation.navigate('RecordatorioDeCita', { cita: item })}>
+                  <View style={[styles.historialIcon, { backgroundColor: '#D1FAE5' }]}>
+                    <Ionicons name="calendar" size={18} color="#10B981" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.historialHeader}>
+                      <Text style={[styles.historialTipo, { color: t.text }]}>{item.motivo || 'Cita médica'}</Text>
+                      <Text style={[styles.historialFecha, { color: t.textMuted }]}>{item.fecha}</Text>
+                    </View>
+                    <Text style={[styles.historialDesc, { color: t.textSub }]}>{item.hora} · {item.doctor}</Text>
+                    <Text style={[{ fontSize: 11, fontWeight: '600', marginTop: 4 },
+                      { color: item.estado === 'Confirmada' ? '#10B981' : item.estado === 'Cancelada' ? '#EF4444' : '#F59E0B' }]}>
+                      {item.estado}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
+                </TouchableOpacity>
+              ))
+            )
+          )}
 
+          {/* FOTOS */}
+          {activeTab === 'Fotos' && <EmptyState icon="folder-open-outline" text="Sin fotos registradas" t={t} />}
+
+          {/* NOTAS */}
           {activeTab === 'Notas' && (
             <TouchableOpacity style={[styles.actionCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}
-              onPress={() => navigation.navigate('NotasPaciente')}>
+              onPress={() => navigation.navigate('NotasPaciente', { paciente })}>
               <View style={[styles.actionIconBox, { backgroundColor: darkMode ? '#1E3A5F' : '#EFF6FF' }]}>
                 <Ionicons name="document-text-outline" size={24} color={t.primary} />
               </View>
@@ -99,42 +171,38 @@ export default function HistorialPaciente({ navigation, route }) {
             </TouchableOpacity>
           )}
 
+          {/* SIGNOS VITALES */}
           {activeTab === 'Signos Vitales' && (
             <>
               <TouchableOpacity style={[styles.newSignosBtn, { backgroundColor: t.primary }]}
-                onPress={() => navigation.navigate('SignosVitales')}>
+                onPress={() => navigation.navigate('SignosVitales', { paciente })}>
                 <Ionicons name="add-circle-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
                 <Text style={styles.newSignosBtnText}>Registrar Signos Vitales</Text>
               </TouchableOpacity>
-              <View style={styles.signosGrid}>
-                {[
-                  { label:'Peso', valor:'68 kg', iconBg:'#D1FAE5', iconColor:'#10B981', icon:'scale-outline' },
-                  { label:'Presión', valor:'120/80', iconBg:'#FEE2E2', iconColor:'#EF4444', icon:'heart' },
-                  { label:'Frecuencia', valor:'72 lpm', iconBg:'#DBEAFE', iconColor:'#2563EB', icon:'heart-circle-outline' },
-                  { label:'Temperatura', valor:'36.5°C', iconBg:'#FEF3C7', iconColor:'#F59E0B', icon:'thermometer-outline' },
-                ].map(s=>(
-                  <View key={s.label} style={[styles.signoCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-                    <View style={[styles.signoIcon, { backgroundColor: s.iconBg }]}><Ionicons name={s.icon} size={18} color={s.iconColor} /></View>
-                    <Text style={[styles.signoValor, { color: t.text }]}>{s.valor}</Text>
-                    <Text style={[styles.signoLabel, { color: t.textSub }]}>{s.label}</Text>
+
+              {signosUltimos ? (
+                <>
+                  <Text style={[styles.signosHistTitle, { color: t.text }]}>Último registro</Text>
+                  <View style={styles.signosGrid}>
+                    {[
+                      { label: 'Peso', valor: `${signosUltimos.peso} kg`, iconBg: '#D1FAE5', iconColor: '#10B981', icon: 'scale-outline' },
+                      { label: 'Presión', valor: signosUltimos.presion || 'N/D', iconBg: '#FEE2E2', iconColor: '#EF4444', icon: 'heart' },
+                      { label: 'Frecuencia', valor: `${signosUltimos.frecuencia_cardiaca} lpm`, iconBg: '#DBEAFE', iconColor: '#2563EB', icon: 'heart-circle-outline' },
+                      { label: 'Temperatura', valor: `${signosUltimos.temperatura}°C`, iconBg: '#FEF3C7', iconColor: '#F59E0B', icon: 'thermometer-outline' },
+                    ].map(s => (
+                      <View key={s.label} style={[styles.signoCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+                        <View style={[styles.signoIcon, { backgroundColor: s.iconBg }]}>
+                          <Ionicons name={s.icon} size={18} color={s.iconColor} />
+                        </View>
+                        <Text style={[styles.signoValor, { color: t.text }]}>{s.valor}</Text>
+                        <Text style={[styles.signoLabel, { color: t.textSub }]}>{s.label}</Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-              <Text style={[styles.signosHistTitle, { color: t.text }]}>Último registro</Text>
-              <View style={[styles.historialCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-                <View style={[styles.historialIcon, { backgroundColor: '#DBEAFE' }]}><Ionicons name="pulse" size={18} color="#2563EB" /></View>
-                <View style={{ flex: 1 }}>
-                  <View style={styles.historialHeader}>
-                    <Text style={[styles.historialTipo, { color: t.text }]}>Signos Vitales</Text>
-                    <Text style={[styles.historialFecha, { color: t.textMuted }]}>15 Ene 2024</Text>
-                  </View>
-                  <Text style={[styles.historialDesc, { color: t.textSub }]}>Peso: 68kg · PA: 120/80 · FC: 72 lpm · Temp: 36.5°C</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
-                    <Ionicons name="person-circle-outline" size={14} color={t.textMuted} />
-                    <Text style={[styles.historialDoctor, { color: t.textMuted }]}>Dr. Rodríguez</Text>
-                  </View>
-                </View>
-              </View>
+                </>
+              ) : (
+                <EmptyState icon="pulse-outline" text="Sin signos vitales registrados" t={t} />
+              )}
             </>
           )}
         </View>
@@ -170,14 +238,14 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 },
   statBox: { flex: 1, borderRadius: 12, padding: 12, alignItems: 'center', borderWidth: 1 },
   statLabel: { fontSize: 11, marginBottom: 4 },
-  statValue: { fontSize: 15, fontWeight: '700' },
+  statValue: { fontSize: 14, fontWeight: '700' },
   tabsContainer: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
   tab: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   tabText: { fontSize: 13, fontWeight: '600' },
   historialCard: { flexDirection: 'row', padding: 14, borderRadius: 12, marginBottom: 10, borderWidth: 1 },
   historialIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   historialHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  historialTipo: { fontSize: 14, fontWeight: '700' },
+  historialTipo: { fontSize: 14, fontWeight: '700', flex: 1 },
   historialFecha: { fontSize: 12 },
   historialDesc: { fontSize: 13, marginTop: 4 },
   historialDoctor: { fontSize: 12, marginLeft: 4 },
@@ -190,7 +258,7 @@ const styles = StyleSheet.create({
   signosGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   signoCard: { width: '47%', borderRadius: 14, borderWidth: 1, padding: 14, alignItems: 'center' },
   signoIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  signoValor: { fontSize: 18, fontWeight: '800' },
+  signoValor: { fontSize: 16, fontWeight: '800' },
   signoLabel: { fontSize: 12, marginTop: 2 },
   signosHistTitle: { fontSize: 14, fontWeight: '700', marginBottom: 10 },
 });

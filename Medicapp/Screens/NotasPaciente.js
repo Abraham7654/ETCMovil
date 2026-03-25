@@ -1,13 +1,45 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView, Alert, ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../store/useTheme';
+import { getNotas, guardarNotas } from '../controllers/NotasController';
 
 export default function NotasPaciente({ navigation, route }) {
-  const { darkMode, t } = useTheme();
+  const { t } = useTheme();
+  const paciente = route?.params?.paciente;
   const [notas, setNotas] = useState('');
-  const STATS = [{ label: 'Última Cita', val: '15 Ene', blue: false },{ label: 'Próxima', val: '22 Ene', blue: true },{ label: 'Total Citas', val: '24', blue: false }];
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (paciente?.id) cargarNotas();
+  }, [paciente?.id]);
+
+  const cargarNotas = async () => {
+    setLoading(true);
+    const result = await getNotas(paciente.id);
+    if (result.success && result.nota) setNotas(result.nota.contenido || '');
+    setLoading(false);
+  };
+
+  const handleGuardar = async () => {
+    if (!paciente?.id) return;
+    setSaving(true);
+    const result = await guardarNotas(paciente.id, notas);
+    setSaving(false);
+    if (result.success) {
+      Alert.alert('✅ Guardado', 'Notas guardadas correctamente');
+    } else {
+      Alert.alert('Error', result.mensaje || 'No se pudieron guardar las notas');
+    }
+  };
+
   const TABS = ['Historial', 'Citas', 'Fotos', 'Notas'];
+
+  if (!paciente) return null;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
@@ -23,53 +55,66 @@ export default function NotasPaciente({ navigation, route }) {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Tarjeta paciente */}
         <View style={[styles.patientCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
           <View style={[styles.patientAvatar, { backgroundColor: t.bg3 }]}>
             <Ionicons name="person" size={28} color={t.textMuted} />
           </View>
           <View style={styles.patientInfo}>
-            <Text style={[styles.patientName, { color: t.text }]}>María González</Text>
-            <Text style={[styles.patientId, { color: t.textSub }]}>ID: 001234</Text>
-            <Text style={[styles.statusBadge, { color: t.success }]}>Activo</Text>
+            <Text style={[styles.patientName, { color: t.text }]}>{paciente.nombre}</Text>
+            <Text style={[styles.patientId, { color: t.textSub }]}>ID: {paciente.id}</Text>
+            <Text style={[styles.statusBadge, { color: t.success }]}>{paciente.estado || 'Activo'}</Text>
           </View>
           <View style={styles.patientMeta}>
-            <Text style={[styles.ageText, { color: t.text }]}>42 años</Text>
-            <Text style={[styles.generoText, { color: t.textSub }]}>Femenino</Text>
+            <Text style={[styles.ageText, { color: t.text }]}>{paciente.edad} años</Text>
+            <Text style={[styles.generoText, { color: t.textSub }]}>{paciente.genero || 'N/D'}</Text>
           </View>
         </View>
 
-        <View style={styles.statsRow}>
-          {STATS.map((s, i) => (
-            <View key={i} style={[styles.statBox, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-              <Text style={[styles.statLabel, { color: t.textMuted }]}>{s.label}</Text>
-              <Text style={[styles.statValue, { color: s.blue ? t.primary : t.text }]}>{s.val}</Text>
-            </View>
-          ))}
-        </View>
-
+        {/* Tabs */}
         <View style={[styles.tabsContainer, { backgroundColor: t.bg3 }]}>
           {TABS.map(tab => (
             <TouchableOpacity key={tab}
-              style={[styles.tab, tab === 'Notas' && { backgroundColor: t.card, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }]}
+              style={[styles.tab, tab === 'Notas' && { backgroundColor: t.card, elevation: 2 }]}
               onPress={() => tab !== 'Notas' && navigation.goBack()}>
-              <Text style={[styles.tabText, { color: tab === 'Notas' ? t.primary : t.textMuted }, tab === 'Notas' && { fontWeight: '700' }]}>{tab}</Text>
+              <Text style={[styles.tabText, { color: tab === 'Notas' ? t.primary : t.textMuted },
+                tab === 'Notas' && { fontWeight: '700' }]}>
+                {tab}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
 
+        {/* Área de notas */}
         <View style={styles.notesSection}>
           <View style={[styles.notesCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
             <Text style={[styles.notesTitle, { color: t.text }]}>Observaciones Médicas</Text>
-            <TextInput style={[styles.notesInput, { color: t.text }]}
-              placeholder="Escriba las observaciones médicas... • Síntomas • Examen físico • Diagnóstico • Plan de tratamiento"
-              placeholderTextColor={t.textMuted} value={notas} onChangeText={setNotas} multiline textAlignVertical="top" />
+            {loading ? (
+              <ActivityIndicator color={t.primary} style={{ marginTop: 20 }} />
+            ) : (
+              <TextInput
+                style={[styles.notesInput, { color: t.text }]}
+                placeholder="Síntomas reportados • Examen físico • Diagnóstico • Plan de tratamiento • Recomendaciones"
+                placeholderTextColor={t.textMuted}
+                value={notas}
+                onChangeText={setNotas}
+                multiline
+                textAlignVertical="top"
+              />
+            )}
           </View>
         </View>
 
+        {/* Botones */}
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.primary }]}>
-            <Ionicons name="save-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.saveBtnText}>Guardar Notas</Text>
+          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.primary }]}
+            onPress={handleGuardar} disabled={saving}>
+            {saving ? <ActivityIndicator color="#fff" /> : (
+              <>
+                <Ionicons name="save-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.saveBtnText}>Guardar Notas</Text>
+              </>
+            )}
           </TouchableOpacity>
           <View style={styles.secondaryRow}>
             <TouchableOpacity style={[styles.draftBtn, { backgroundColor: t.bg3 }]}>
@@ -102,10 +147,6 @@ const styles = StyleSheet.create({
   patientMeta: { alignItems: 'flex-end' },
   ageText: { fontSize: 16, fontWeight: '700' },
   generoText: { fontSize: 13 },
-  statsRow: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 },
-  statBox: { flex: 1, borderRadius: 12, padding: 12, alignItems: 'center', borderWidth: 1 },
-  statLabel: { fontSize: 11, marginBottom: 4 },
-  statValue: { fontSize: 15, fontWeight: '700' },
   tabsContainer: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, borderRadius: 12, padding: 4 },
   tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 10 },
   tabText: { fontSize: 13, fontWeight: '500' },

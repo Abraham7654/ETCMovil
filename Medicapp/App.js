@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import { themeStore } from './store/themeStore';
-import { lightTheme, darkTheme } from './theme/theme';
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { initDB } from "./database/Database";
+import { themeStore } from "./store/themeStore";
+import { lightTheme, darkTheme } from "./theme/theme";
 
-import InicioDeSesion from './screens/InicioDeSesion';
-import ListaDePacientes from './screens/ListaDePacientes';
-import CrearPaciente from './screens/CrearPaciente';
-import HistorialPaciente from './screens/HistorialPaciente';
-import NotasPaciente from './screens/NotasPaciente';
-import SignosVitales from './screens/SignosVitales';
-import ListaDeCitas from './screens/ListaDeCitas';
-import CrearCita from './screens/CrearCita';
-import RecordatorioDeCita from './screens/RecordatorioDeCita';
-import Ajustes from './screens/Ajustes';
-import Perfil from './screens/Perfil';
+import InicioDeSesion from "./screens/InicioDeSesion";
+import ListaDePacientes from "./screens/ListaDePacientes";
+import CrearPaciente from "./screens/CrearPaciente";
+import HistorialPaciente from "./screens/HistorialPaciente";
+import NotasPaciente from "./screens/NotasPaciente";
+import SignosVitales from "./screens/SignosVitales";
+import ListaDeCitas from "./screens/ListaDeCitas";
+import CrearCita from "./screens/CrearCita";
+import RecordatorioDeCita from "./screens/RecordatorioDeCita";
+import Ajustes from "./screens/Ajustes";
+import Perfil from "./screens/Perfil";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,7 +55,6 @@ function AjustesStack() {
 }
 
 function MainTabs() {
-  // Tab bar también reacciona al cambio de tema
   const [darkMode, setDarkMode] = useState(themeStore.getDarkMode());
   const t = darkMode ? darkTheme : lightTheme;
 
@@ -75,24 +76,40 @@ function MainTabs() {
           paddingBottom: 8,
           paddingTop: 4,
         },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: "500" },
         tabBarIcon: ({ color }) => {
           let iconName;
-          if (route.name === 'PacientesTab') iconName = 'people';
-          else if (route.name === 'CitasTab') iconName = 'calendar';
-          else if (route.name === 'AjustesTab') iconName = 'settings';
+          if (route.name === "PacientesTab") iconName = "people";
+          else if (route.name === "CitasTab") iconName = "calendar";
+          else if (route.name === "AjustesTab") iconName = "settings";
           return <Ionicons name={iconName} size={22} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="PacientesTab" component={PacientesStack} options={{ title: 'Pacientes' }} />
-      <Tab.Screen name="CitasTab" component={CitasStack} options={{ title: 'Citas' }} />
-      <Tab.Screen name="AjustesTab" component={AjustesStack} options={{ title: 'Ajustes' }} />
+      <Tab.Screen name="PacientesTab" component={PacientesStack} options={{ title: "Pacientes" }} />
+      <Tab.Screen name="CitasTab" component={CitasStack} options={{ title: "Citas" }} />
+      <Tab.Screen name="AjustesTab" component={AjustesStack} options={{ title: "Ajustes" }} />
     </Tab.Navigator>
   );
 }
 
 export default function App() {
+  const [dbReady, setDbReady] = useState(false);
+
+  useEffect(() => {
+    initDB()
+      .then(() => setDbReady(true))
+      .catch((e) => { console.error("Error DB:", e); setDbReady(true); });
+  }, []);
+
+  if (!dbReady) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>

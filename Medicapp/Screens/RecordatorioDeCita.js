@@ -1,13 +1,49 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, ScrollView, Switch, Platform } from 'react-native';
+import {
+  View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
+  StatusBar, ScrollView, Switch, Platform, Alert,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../store/useTheme';
+import { cancelarCita, confirmarCita } from '../controllers/CitaController';
 
 export default function RecordatorioDeCita({ navigation, route }) {
   const { darkMode, t } = useTheme();
+  const cita = route?.params?.cita;
   const [r15min, setR15min] = useState(true);
   const [r1hora, setR1hora] = useState(false);
   const [r1dia, setR1dia] = useState(false);
+  const [estadoCita, setEstadoCita] = useState(cita?.estado || 'Pendiente');
+
+  const handleConfirmar = async () => {
+    if (!cita?.id) return;
+    const result = await confirmarCita(cita.id);
+    if (result.success) {
+      setEstadoCita('Confirmada');
+      Alert.alert('Exito', 'Cita confirmada correctamente');
+    }
+  };
+
+  const handleCancelar = async () => {
+    if (!cita?.id) return;
+    Alert.alert('Cancelar Cita', 'Esta accion no se puede deshacer.', [
+      { text: 'No', style: 'cancel' },
+      {
+        text: 'Si, cancelar', style: 'destructive',
+        onPress: async () => {
+          const result = await cancelarCita(cita.id);
+          if (result.success) {
+            setEstadoCita('Cancelada');
+            Alert.alert('Cita cancelada', '', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+          }
+        },
+      },
+    ]);
+  };
+
+  if (!cita) return null;
+
+  const colorEstado = estadoCita === 'Confirmada' ? '#10B981' : estadoCita === 'Cancelada' ? '#EF4444' : '#F59E0B';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
@@ -19,72 +55,83 @@ export default function RecordatorioDeCita({ navigation, route }) {
         <Text style={[styles.headerTitle, { color: t.text }]}>Recordatorio de Cita</Text>
         <View style={{ width: 40 }} />
       </View>
-
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={[styles.notifBanner, { backgroundColor: darkMode ? '#1E3A5F' : '#EFF6FF' }]}>
           <View style={[styles.notifIcon, { backgroundColor: t.primary }]}>
             <Ionicons name="notifications" size={20} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.notifTitle, { color: darkMode ? '#93C5FD' : '#1E40AF' }]}>Recordatorio Próximo</Text>
-            <Text style={[styles.notifSub, { color: darkMode ? '#60A5FA' : '#3B82F6' }]}>Cita con María González mañana a las 10:30 AM</Text>
-            <Text style={[styles.notifTime, { color: darkMode ? '#475569' : '#93C5FD' }]}>Hace 2 minutos</Text>
+            <Text style={[styles.notifTitle, { color: darkMode ? '#93C5FD' : '#1E40AF' }]}>Recordatorio de Cita Medica</Text>
+            <Text style={[styles.notifSub, { color: darkMode ? '#60A5FA' : '#3B82F6' }]}>
+              Cita con {cita.paciente_nombre} - {cita.fecha} a las {cita.hora}
+            </Text>
           </View>
         </View>
 
         <View style={[styles.citaCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
           <View style={styles.citaCardHeader}>
             <Text style={[styles.citaCardTitle, { color: t.text }]}>Detalles de la Cita</Text>
-            <Text style={[styles.confirmadaBadge, { color: t.success }]}>Confirmada</Text>
+            <Text style={[styles.confirmadaBadge, { color: colorEstado }]}>{estadoCita}</Text>
           </View>
           <View style={[styles.fechaBlock, { backgroundColor: t.bg3, borderColor: t.separator }]}>
-            <Text style={[styles.fechaDia, { color: t.primary }]}>15</Text>
-            <Text style={[styles.fechaMes, { color: t.primary }]}>Marzo 2024</Text>
-            <Text style={[styles.fechaHora, { color: t.text }]}>10:30 AM</Text>
-            <Text style={[styles.fechaDuracion, { color: t.textSub }]}>45 minutos de duración</Text>
+            <Text style={[styles.fechaDia, { color: t.primary }]}>{cita.fecha?.split('-')[2] || '--'}</Text>
+            <Text style={[styles.fechaMes, { color: t.primary }]}>{cita.fecha || 'Sin fecha'}</Text>
+            <Text style={[styles.fechaHora, { color: t.text }]}>{cita.hora}</Text>
+            <Text style={[styles.fechaDuracion, { color: t.textSub }]}>Consulta medica</Text>
           </View>
           <View style={[styles.infoRow, { borderBottomColor: t.separator }]}>
             <View style={[styles.avatarSmall, { backgroundColor: t.bg3 }]}>
               <Ionicons name="person-circle-outline" size={24} color={t.textMuted} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.infoName, { color: t.text }]}>María González</Text>
-              <Text style={[styles.infoSub, { color: t.textMuted }]}>ID: 001234</Text>
+              <Text style={[styles.infoName, { color: t.text }]}>{cita.paciente_nombre}</Text>
+              <Text style={[styles.infoSub, { color: t.textMuted }]}>ID: {cita.paciente_id}</Text>
             </View>
             <TouchableOpacity style={[styles.phoneBtn, { backgroundColor: darkMode ? '#1E3A5F' : '#EFF6FF' }]}>
               <Ionicons name="call" size={18} color={t.primary} />
             </TouchableOpacity>
           </View>
           <View style={styles.detailRow}>
-            <Ionicons name="location-outline" size={16} color={t.textSub} style={styles.rowIcon} />
-            <View><Text style={[styles.detailLabel, { color: t.text }]}>Centro Médico San Rafael</Text><Text style={[styles.detailSub, { color: t.textSub }]}>Piso 3, Consultorio 301</Text></View>
-          </View>
-          <View style={styles.detailRow}>
             <Ionicons name="medical-outline" size={16} color={t.textSub} style={styles.rowIcon} />
-            <View><Text style={[styles.detailLabel, { color: t.text }]}>Control de rutina</Text><Text style={[styles.detailSub, { color: t.textSub }]}>Consulta general</Text></View>
+            <View>
+              <Text style={[styles.detailLabel, { color: t.text }]}>{cita.motivo || 'Sin motivo especificado'}</Text>
+              <Text style={[styles.detailSub, { color: t.textSub }]}>Doctor: {cita.doctor}</Text>
+            </View>
           </View>
+          {cita.notas ? (
+            <View style={styles.detailRow}>
+              <Ionicons name="document-text-outline" size={16} color={t.textSub} style={styles.rowIcon} />
+              <Text style={[styles.detailLabel, { color: t.text }]}>{cita.notas}</Text>
+            </View>
+          ) : null}
         </View>
 
         <View style={[styles.reminderCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
           <Text style={[styles.reminderTitle, { color: t.text }]}>Opciones de Recordatorio</Text>
           <ReminderRow icon="notifications-outline" label="15 minutos antes" value={r15min} onValueChange={setR15min} t={t} />
           <ReminderRow icon="time-outline" label="1 hora antes" value={r1hora} onValueChange={setR1hora} t={t} />
-          <ReminderRow icon="calendar-outline" label="1 día antes" value={r1dia} onValueChange={setR1dia} t={t} noBorder />
+          <ReminderRow icon="calendar-outline" label="1 dia antes" value={r1dia} onValueChange={setR1dia} t={t} noBorder />
         </View>
 
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: t.primary }]} onPress={() => navigation.goBack()}>
-            <Ionicons name="checkmark" size={20} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.primaryBtnText}>Entendido</Text>
+          {estadoCita !== 'Confirmada' && estadoCita !== 'Cancelada' && (
+            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: t.primary }]} onPress={handleConfirmar}>
+              <Ionicons name="checkmark" size={20} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.primaryBtnText}>Confirmar Cita</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={[styles.secondaryBtn, { borderColor: t.cardBorder }]} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back-outline" size={18} color={t.text} style={{ marginRight: 8 }} />
+            <Text style={[styles.secondaryBtnText, { color: t.text }]}>Volver</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.secondaryBtn, { borderColor: t.cardBorder }]}>
-            <Ionicons name="calendar-outline" size={18} color={t.text} style={{ marginRight: 8 }} />
-            <Text style={[styles.secondaryBtnText, { color: t.text }]}>Reprogramar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.dangerBtn, { borderColor: darkMode ? '#7F1D1D' : '#FEE2E2', backgroundColor: darkMode ? '#1C0A0A' : '#FFF5F5' }]}>
-            <Ionicons name="close-circle-outline" size={18} color="#EF4444" style={{ marginRight: 8 }} />
-            <Text style={styles.dangerBtnText}>Cancelar Cita</Text>
-          </TouchableOpacity>
+          {estadoCita !== 'Cancelada' && (
+            <TouchableOpacity
+              style={[styles.dangerBtn, { borderColor: darkMode ? '#7F1D1D' : '#FEE2E2', backgroundColor: darkMode ? '#1C0A0A' : '#FFF5F5' }]}
+              onPress={handleCancelar}>
+              <Ionicons name="close-circle-outline" size={18} color="#EF4444" style={{ marginRight: 8 }} />
+              <Text style={styles.dangerBtnText}>Cancelar Cita</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -114,7 +161,6 @@ const styles = StyleSheet.create({
   notifIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   notifTitle: { fontSize: 14, fontWeight: '700' },
   notifSub: { fontSize: 12, marginTop: 2, lineHeight: 16 },
-  notifTime: { fontSize: 11, marginTop: 4 },
   citaCard: { borderWidth: 1, borderRadius: 16, padding: 16, marginBottom: 16 },
   citaCardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
   citaCardTitle: { fontSize: 16, fontWeight: '700' },

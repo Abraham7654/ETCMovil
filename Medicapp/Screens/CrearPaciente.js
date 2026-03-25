@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, StatusBar } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  ScrollView, SafeAreaView, StatusBar, Alert, ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../store/useTheme';
+import { crearPaciente } from '../controllers/PacienteController';
 
 const GENEROS = ['Masculino', 'Femenino', 'Otro'];
 const SANGRE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const ESTADOS = ['Activo', 'Pendiente', 'Urgente'];
 
-export default function CrearPaciente({ navigation, route }) {
+export default function CrearPaciente({ navigation }) {
   const { darkMode, t } = useTheme();
   const [nombre, setNombre] = useState('');
   const [edad, setEdad] = useState('');
@@ -16,8 +21,32 @@ export default function CrearPaciente({ navigation, route }) {
   const [sangre, setSangre] = useState('');
   const [alergias, setAlergias] = useState('');
   const [notas, setNotas] = useState('');
+  const [estado, setEstado] = useState('Activo');
   const [showGenero, setShowGenero] = useState(false);
   const [showSangre, setShowSangre] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleGuardar = async () => {
+    if (!nombre.trim()) {
+      Alert.alert('Error', 'El nombre del paciente es obligatorio');
+      return;
+    }
+    setLoading(true);
+    const result = await crearPaciente({
+      nombre, edad, genero, telefono,
+      contacto_emergencia: emergencia,
+      tipo_sangre: sangre, alergias,
+      notas_medicas: notas, estado,
+    });
+    setLoading(false);
+    if (result.success) {
+      Alert.alert('✅ Éxito', 'Paciente guardado correctamente', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } else {
+      Alert.alert('Error', result.mensaje || 'No se pudo guardar el paciente');
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
@@ -40,22 +69,36 @@ export default function CrearPaciente({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        <Field label="Nombre Completo" value={nombre} onChangeText={setNombre} placeholder="Ingrese el nombre completo" t={t} />
+        {/* Nombre */}
+        <Text style={[styles.label, { color: t.textSub }]}>Nombre Completo *</Text>
+        <View style={[styles.inputContainer, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
+          <TextInput style={[styles.input, { color: t.text }]} placeholder="Ingrese el nombre completo"
+            placeholderTextColor={t.textMuted} value={nombre} onChangeText={setNombre} />
+        </View>
 
+        {/* Edad y Género */}
         <View style={styles.row}>
           <View style={{ flex: 1, marginRight: 8 }}>
-            <Field label="Edad" value={edad} onChangeText={setEdad} placeholder="Edad" keyboardType="numeric" t={t} />
+            <Text style={[styles.label, { color: t.textSub }]}>Edad</Text>
+            <View style={[styles.inputContainer, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
+              <TextInput style={[styles.input, { color: t.text }]} placeholder="Edad"
+                placeholderTextColor={t.textMuted} value={edad} onChangeText={setEdad} keyboardType="numeric" />
+            </View>
           </View>
           <View style={{ flex: 1, marginLeft: 8 }}>
             <Text style={[styles.label, { color: t.textSub }]}>Género</Text>
-            <TouchableOpacity style={[styles.dropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]} onPress={() => setShowGenero(!showGenero)}>
-              <Text style={[styles.dropdownText, { color: genero ? t.text : t.textMuted }]}>{genero || 'Seleccionar'}</Text>
+            <TouchableOpacity style={[styles.dropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+              onPress={() => setShowGenero(!showGenero)}>
+              <Text style={[styles.dropdownText, { color: genero ? t.text : t.textMuted }]}>
+                {genero || 'Seleccionar'}
+              </Text>
               <Ionicons name="chevron-down" size={18} color={t.textSub} />
             </TouchableOpacity>
             {showGenero && (
               <View style={[styles.dropdownMenu, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
                 {GENEROS.map(g => (
-                  <TouchableOpacity key={g} style={[styles.dropdownItem, { borderBottomColor: t.separator }]} onPress={() => { setGenero(g); setShowGenero(false); }}>
+                  <TouchableOpacity key={g} style={[styles.dropdownItem, { borderBottomColor: t.separator }]}
+                    onPress={() => { setGenero(g); setShowGenero(false); }}>
                     <Text style={[styles.dropdownItemText, { color: t.text }]}>{g}</Text>
                   </TouchableOpacity>
                 ))}
@@ -64,65 +107,84 @@ export default function CrearPaciente({ navigation, route }) {
           </View>
         </View>
 
+        {/* Estado */}
+        <Text style={[styles.label, { color: t.textSub }]}>Estado</Text>
+        <View style={styles.chipRow}>
+          {ESTADOS.map(e => (
+            <TouchableOpacity key={e}
+              style={[styles.chip, { borderColor: t.cardBorder, backgroundColor: estado === e ? t.primary : t.bg3 }]}
+              onPress={() => setEstado(e)}>
+              <Text style={[styles.chipText, { color: estado === e ? '#fff' : t.text }]}>{e}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Teléfono */}
         <Text style={[styles.label, { color: t.textSub }]}>Teléfono</Text>
         <View style={[styles.inputContainer, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
           <Ionicons name="call-outline" size={18} color={t.textMuted} style={{ marginRight: 8 }} />
-          <TextInput style={[styles.input, { color: t.text }]} placeholder="+52 123 456 7890" placeholderTextColor={t.textMuted} value={telefono} onChangeText={setTelefono} keyboardType="phone-pad" />
+          <TextInput style={[styles.input, { color: t.text }]} placeholder="+52 123 456 7890"
+            placeholderTextColor={t.textMuted} value={telefono} onChangeText={setTelefono} keyboardType="phone-pad" />
         </View>
 
+        {/* Emergencia */}
         <Text style={[styles.label, { color: t.textSub }]}>Contacto de Emergencia</Text>
         <View style={[styles.inputContainer, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
           <Ionicons name="people-outline" size={18} color={t.textMuted} style={{ marginRight: 8 }} />
-          <TextInput style={[styles.input, { color: t.text }]} placeholder="Teléfono de emergencia" placeholderTextColor={t.textMuted} value={emergencia} onChangeText={setEmergencia} keyboardType="phone-pad" />
+          <TextInput style={[styles.input, { color: t.text }]} placeholder="Teléfono de emergencia"
+            placeholderTextColor={t.textMuted} value={emergencia} onChangeText={setEmergencia} keyboardType="phone-pad" />
         </View>
 
+        {/* Tipo de Sangre */}
         <Text style={[styles.label, { color: t.textSub }]}>Tipo de Sangre</Text>
-        <TouchableOpacity style={[styles.dropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]} onPress={() => setShowSangre(!showSangre)}>
-          <Text style={[styles.dropdownText, { color: sangre ? t.text : t.textMuted }]}>{sangre || 'Seleccionar tipo'}</Text>
+        <TouchableOpacity style={[styles.dropdown, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}
+          onPress={() => setShowSangre(!showSangre)}>
+          <Text style={[styles.dropdownText, { color: sangre ? t.text : t.textMuted }]}>
+            {sangre || 'Seleccionar tipo'}
+          </Text>
           <Ionicons name="chevron-down" size={18} color={t.textSub} />
         </TouchableOpacity>
         {showSangre && (
           <View style={[styles.dropdownMenu, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
             {SANGRE.map(s => (
-              <TouchableOpacity key={s} style={[styles.dropdownItem, { borderBottomColor: t.separator }]} onPress={() => { setSangre(s); setShowSangre(false); }}>
+              <TouchableOpacity key={s} style={[styles.dropdownItem, { borderBottomColor: t.separator }]}
+                onPress={() => { setSangre(s); setShowSangre(false); }}>
                 <Text style={[styles.dropdownItemText, { color: t.text }]}>{s}</Text>
               </TouchableOpacity>
             ))}
           </View>
         )}
 
+        {/* Alergias */}
         <Text style={[styles.label, { color: t.textSub, marginTop: 16 }]}>Alergias</Text>
         <TextInput style={[styles.textArea, { backgroundColor: t.inputBg, borderColor: t.inputBorder, color: t.text }]}
           placeholder="Describa alergias conocidas..." placeholderTextColor={t.textMuted}
           value={alergias} onChangeText={setAlergias} multiline numberOfLines={3} textAlignVertical="top" />
 
+        {/* Notas */}
         <Text style={[styles.label, { color: t.textSub, marginTop: 16 }]}>Notas Médicas</Text>
         <TextInput style={[styles.textArea, { backgroundColor: t.inputBg, borderColor: t.inputBorder, color: t.text }]}
-          placeholder="Antecedentes médicos, medicamentos actuales..." placeholderTextColor={t.textMuted}
-          value={notas} onChangeText={setNotas} multiline numberOfLines={4} textAlignVertical="top" />
+          placeholder="Antecedentes médicos, medicamentos actuales..."
+          placeholderTextColor={t.textMuted} value={notas} onChangeText={setNotas}
+          multiline numberOfLines={4} textAlignVertical="top" />
 
+        {/* Botones */}
         <View style={styles.buttons}>
           <TouchableOpacity style={[styles.cancelBtn, { borderColor: t.cardBorder }]} onPress={() => navigation.goBack()}>
             <Text style={[styles.cancelText, { color: t.text }]}>Cancelar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.primary }]} onPress={() => navigation.goBack()}>
-            <Ionicons name="checkmark" size={18} color="#fff" style={{ marginRight: 6 }} />
-            <Text style={styles.saveText}>Guardar</Text>
+          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.primary }]}
+            onPress={handleGuardar} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : (
+              <>
+                <Ionicons name="checkmark" size={18} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={styles.saveText}>Guardar</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function Field({ label, value, onChangeText, placeholder, keyboardType, t }) {
-  return (
-    <View>
-      <Text style={[{ fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 4 }, { color: t.textSub }]}>{label}</Text>
-      <View style={[styles.inputContainer, { backgroundColor: t.inputBg, borderColor: t.inputBorder }]}>
-        <TextInput style={[styles.input, { color: t.text }]} placeholder={placeholder} placeholderTextColor={t.textMuted} value={value} onChangeText={onChangeText} keyboardType={keyboardType || 'default'} />
-      </View>
-    </View>
   );
 }
 
@@ -139,6 +201,9 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 4 },
   inputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, height: 48, marginBottom: 4 },
   input: { flex: 1, fontSize: 14 },
+  chipRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
+  chipText: { fontSize: 13, fontWeight: '600' },
   dropdown: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, height: 48, marginBottom: 4 },
   dropdownText: { fontSize: 14 },
   dropdownMenu: { borderWidth: 1, borderRadius: 10, marginBottom: 8 },
