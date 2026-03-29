@@ -48,7 +48,7 @@ export default function Perfil({ navigation }) {
             <Text style={[styles.sectionTitle, { color: t.text }]}>Seguridad</Text>
           </View>
           <TouchableOpacity style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.text }]}>Cambiar Contrasena</Text>
+            <Text style={[styles.rowLabel, { color: t.text }]}>Cambiar Contraseña</Text>
             <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
           </TouchableOpacity>
           <View style={[styles.divider, { backgroundColor: t.separator }]} />

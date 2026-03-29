@@ -11,6 +11,7 @@ import { lightTheme, darkTheme } from "./theme/theme";
 import InicioDeSesion from "./screens/InicioDeSesion";
 import ListaDePacientes from "./screens/ListaDePacientes";
 import CrearPaciente from "./screens/CrearPaciente";
+import EditarPaciente from "./screens/EditarPaciente";
 import HistorialPaciente from "./screens/HistorialPaciente";
 import NotasPaciente from "./screens/NotasPaciente";
 import SignosVitales from "./screens/SignosVitales";
@@ -28,6 +29,7 @@ function PacientesStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ListaDePacientes" component={ListaDePacientes} />
       <Stack.Screen name="CrearPaciente" component={CrearPaciente} />
+      <Stack.Screen name="EditarPaciente" component={EditarPaciente} />
       <Stack.Screen name="HistorialPaciente" component={HistorialPaciente} />
       <Stack.Screen name="NotasPaciente" component={NotasPaciente} />
       <Stack.Screen name="SignosVitales" component={SignosVitales} />

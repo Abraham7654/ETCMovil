@@ -67,7 +67,7 @@ export default function Ajustes({ navigation }) {
         </View>
         <Text style={[styles.sectionTitle, { color: t.textMuted }]}>SEGURIDAD</Text>
         <View style={[styles.section, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-          <TouchableOpacity style={styles.settingRow}><View style={[styles.settingIcon, { backgroundColor: "#6B7280" }]}><Ionicons name="lock-closed" size={16} color="#fff" /></View><View style={{ flex: 1 }}><Text style={[styles.settingLabel, { color: t.text }]}>Cambiar Contrasena</Text></View><Ionicons name="chevron-forward" size={16} color={t.textMuted} /></TouchableOpacity>
+          <TouchableOpacity style={styles.settingRow}><View style={[styles.settingIcon, { backgroundColor: "#6B7280" }]}><Ionicons name="lock-closed" size={16} color="#fff" /></View><View style={{ flex: 1 }}><Text style={[styles.settingLabel, { color: t.text }]}>Cambiar Contraseña</Text></View><Ionicons name="chevron-forward" size={16} color={t.textMuted} /></TouchableOpacity>
         </View>
         <Text style={[styles.sectionTitle, { color: t.textMuted }]}>SOPORTE</Text>
         <View style={[styles.section, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
