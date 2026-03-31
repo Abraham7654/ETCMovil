@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
   SafeAreaView, StatusBar, ActivityIndicator, Alert,
-  Modal, Animated, Dimensions,
+  Modal, Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -68,21 +68,11 @@ export default function HistorialPaciente({ navigation, route }) {
   const handleOpcion = (id) => {
     cerrarMenu(() => {
       switch (id) {
-        case 'editar':
-          navigation.navigate('EditarPaciente', { paciente });
-          break;
-        case 'cita':
-          navigation.navigate('CrearCita', { pacientePreseleccionado: paciente });
-          break;
-        case 'signos':
-          navigation.navigate('SignosVitales', { paciente });
-          break;
-        case 'notas':
-          navigation.navigate('NotasPaciente', { paciente });
-          break;
-        case 'eliminar':
-          confirmarEliminar();
-          break;
+        case 'editar':   navigation.navigate('EditarPaciente', { paciente }); break;
+        case 'cita':     navigation.navigate('CrearCita', { pacientePreseleccionado: paciente }); break;
+        case 'signos':   navigation.navigate('SignosVitales', { paciente }); break;
+        case 'notas':    navigation.navigate('NotasPaciente', { paciente }); break;
+        case 'eliminar': confirmarEliminar(); break;
       }
     });
   };
@@ -94,8 +84,7 @@ export default function HistorialPaciente({ navigation, route }) {
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Eliminar',
-          style: 'destructive',
+          text: 'Eliminar', style: 'destructive',
           onPress: async () => {
             const result = await eliminarPaciente(paciente.id);
             if (result.success) {
@@ -131,55 +120,33 @@ export default function HistorialPaciente({ navigation, route }) {
       {/* Menú desplegable */}
       <Modal transparent visible={menuVisible} animationType="none" onRequestClose={() => cerrarMenu()}>
         <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={() => cerrarMenu()}>
-          <Animated.View
-            style={[
-              styles.menuContainer,
-              {
-                backgroundColor: t.card,
-                borderColor: t.cardBorder,
-                opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }],
-              },
-            ]}
-          >
-            {/* Cabecera del menú */}
+          <Animated.View style={[
+            styles.menuContainer,
+            { backgroundColor: t.card, borderColor: t.cardBorder, opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+          ]}>
             <View style={[styles.menuHeader, { borderBottomColor: t.separator }]}>
               <View style={[styles.menuAvatar, { backgroundColor: t.bg3 }]}>
                 <Ionicons name="person" size={16} color={t.textMuted} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.menuPatientName, { color: t.text }]} numberOfLines={1}>
-                  {paciente.nombre}
-                </Text>
-                <Text style={[styles.menuPatientSub, { color: t.textMuted }]}>
-                  ID: {paciente.id} · {paciente.edad} años
-                </Text>
+                <Text style={[styles.menuPatientName, { color: t.text }]} numberOfLines={1}>{paciente.nombre}</Text>
+                <Text style={[styles.menuPatientSub, { color: t.textMuted }]}>ID: {paciente.id} · {paciente.edad} años</Text>
               </View>
             </View>
-
-            {/* Opciones */}
             {MENU_OPCIONES.map((op, index) => (
               <React.Fragment key={op.id}>
-                {op.id === 'eliminar' && (
-                  <View style={[styles.menuDivider, { backgroundColor: t.separator }]} />
-                )}
+                {op.id === 'eliminar' && <View style={[styles.menuDivider, { backgroundColor: t.separator }]} />}
                 <TouchableOpacity
                   style={[styles.menuItem, index === MENU_OPCIONES.length - 1 && { borderBottomWidth: 0 }]}
-                  onPress={() => handleOpcion(op.id)}
-                  activeOpacity={0.7}
+                  onPress={() => handleOpcion(op.id)} activeOpacity={0.7}
                 >
                   <View style={[styles.menuItemIcon, { backgroundColor: op.color + '20' }]}>
                     <Ionicons name={op.icon} size={18} color={op.color} />
                   </View>
-                  <Text style={[
-                    styles.menuItemText,
-                    { color: op.id === 'eliminar' ? '#EF4444' : t.text },
-                  ]}>
+                  <Text style={[styles.menuItemText, { color: op.id === 'eliminar' ? '#EF4444' : t.text }]}>
                     {op.label}
                   </Text>
-                  {op.id !== 'eliminar' && (
-                    <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
-                  )}
+                  {op.id !== 'eliminar' && <Ionicons name="chevron-forward" size={16} color={t.textMuted} />}
                 </TouchableOpacity>
               </React.Fragment>
             ))}
@@ -218,7 +185,7 @@ export default function HistorialPaciente({ navigation, route }) {
           ))}
         </View>
 
-        {/* Tabs scrollables */}
+        {/* Tabs */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContainer}>
           {TABS.map(tab => (
             <TouchableOpacity key={tab}
@@ -232,12 +199,13 @@ export default function HistorialPaciente({ navigation, route }) {
         {loading && <ActivityIndicator color={t.primary} style={{ marginTop: 20 }} />}
 
         <View style={{ paddingHorizontal: 16 }}>
-          {/* HISTORIAL */}
+
+          {/* HISTORIAL — FIX: quitado .slice(0,5) para mostrar todas las citas */}
           {activeTab === 'Historial' && (
             citas.length === 0 ? (
               <EmptyState icon="document-text-outline" text="Sin historial médico aún" t={t} />
             ) : (
-              citas.slice(0, 5).map(item => (
+              citas.map(item => (
                 <View key={item.id} style={[styles.historialCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
                   <View style={[styles.historialIcon, { backgroundColor: '#DBEAFE' }]}>
                     <Ionicons name="medical" size={18} color="#2563EB" />
@@ -258,7 +226,7 @@ export default function HistorialPaciente({ navigation, route }) {
             )
           )}
 
-          {/* CITAS */}
+          {/* CITAS — con botón de editar en cada card */}
           {activeTab === 'Citas' && (
             citas.length === 0 ? (
               <EmptyState icon="calendar-outline" text="Sin citas registradas" t={t} />
@@ -281,7 +249,12 @@ export default function HistorialPaciente({ navigation, route }) {
                       {item.estado}
                     </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
+                  <TouchableOpacity
+                    style={styles.editCitaBtn}
+                    onPress={() => navigation.navigate('EditarCita', { cita: item })}
+                  >
+                    <Ionicons name="create-outline" size={18} color={t.primary} />
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))
             )
@@ -313,7 +286,6 @@ export default function HistorialPaciente({ navigation, route }) {
                 <Ionicons name="add-circle-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
                 <Text style={styles.newSignosBtnText}>Registrar Signos Vitales</Text>
               </TouchableOpacity>
-
               {signosUltimos ? (
                 <>
                   <Text style={[styles.signosHistTitle, { color: t.text }]}>Último registro</Text>
@@ -360,39 +332,16 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   moreBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-
-  // Menú desplegable
   menuOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
-  menuContainer: {
-    position: 'absolute', top: 56, right: 12,
-    width: 230, borderRadius: 16, borderWidth: 1,
-    shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 }, elevation: 12,
-    overflow: 'hidden',
-  },
-  menuHeader: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 14, paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  menuAvatar: {
-    width: 30, height: 30, borderRadius: 15,
-    alignItems: 'center', justifyContent: 'center', marginRight: 10,
-  },
+  menuContainer: { position: 'absolute', top: 56, right: 12, width: 230, borderRadius: 16, borderWidth: 1, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 12, overflow: 'hidden' },
+  menuHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
+  menuAvatar: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   menuPatientName: { fontSize: 13, fontWeight: '700' },
   menuPatientSub: { fontSize: 11, marginTop: 1 },
   menuDivider: { height: 1, marginHorizontal: 14, marginVertical: 4 },
-  menuItem: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 14, paddingVertical: 13,
-  },
-  menuItemIcon: {
-    width: 34, height: 34, borderRadius: 10,
-    alignItems: 'center', justifyContent: 'center', marginRight: 12,
-  },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 13 },
+  menuItemIcon: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   menuItemText: { flex: 1, fontSize: 14, fontWeight: '600' },
-
-  // Resto de estilos
   patientCard: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 16, borderRadius: 16, borderWidth: 1 },
   patientAvatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   patientInfo: { flex: 1 },
@@ -409,13 +358,14 @@ const styles = StyleSheet.create({
   tabsContainer: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
   tab: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   tabText: { fontSize: 13, fontWeight: '600' },
-  historialCard: { flexDirection: 'row', padding: 14, borderRadius: 12, marginBottom: 10, borderWidth: 1 },
+  historialCard: { flexDirection: 'row', padding: 14, borderRadius: 12, marginBottom: 10, borderWidth: 1, alignItems: 'center' },
   historialIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   historialHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   historialTipo: { fontSize: 14, fontWeight: '700', flex: 1 },
   historialFecha: { fontSize: 12 },
   historialDesc: { fontSize: 13, marginTop: 4 },
   historialDoctor: { fontSize: 12, marginLeft: 4 },
+  editCitaBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 18 },
   actionCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 14, borderWidth: 1 },
   actionIconBox: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   actionTitle: { fontSize: 15, fontWeight: '700' },

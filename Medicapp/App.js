@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { initDB } from "./database/Database";
 import { themeStore } from "./store/themeStore";
+import { sessionStore } from "./store/sessionStore";
 import { lightTheme, darkTheme } from "./theme/theme";
 
 import InicioDeSesion from "./screens/InicioDeSesion";
@@ -20,6 +21,25 @@ import CrearCita from "./screens/CrearCita";
 import RecordatorioDeCita from "./screens/RecordatorioDeCita";
 import Ajustes from "./screens/Ajustes";
 import Perfil from "./screens/Perfil";
+import CambiarPassword from "./screens/CambiarPassword";
+
+// ─── Notificaciones: compatibles con Expo Go SDK 53 ────────────────────────
+// Las notificaciones remotas fueron removidas de Expo Go en SDK 53.
+// Las locales (scheduleNotificationAsync) siguen funcionando con este wrapper.
+let Notifications = null;
+try {
+  Notifications = require('expo-notifications');
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false, // false evita el warning en Expo Go
+    }),
+  });
+} catch (e) {
+  console.warn('expo-notifications no disponible:', e.message);
+}
+// ────────────────────────────────────────────────────────────────────────────
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -52,6 +72,7 @@ function AjustesStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Ajustes" component={Ajustes} />
       <Stack.Screen name="Perfil" component={Perfil} />
+      <Stack.Screen name="CambiarPassword" component={CambiarPassword} />
     </Stack.Navigator>
   );
 }
@@ -97,14 +118,34 @@ function MainTabs() {
 
 export default function App() {
   const [dbReady, setDbReady] = useState(false);
+  const [sesionActiva, setSesionActiva] = useState(undefined); // undefined = cargando
 
   useEffect(() => {
-    initDB()
-      .then(() => setDbReady(true))
-      .catch((e) => { console.error("Error DB:", e); setDbReady(true); });
+    arrancar();
   }, []);
 
-  if (!dbReady) {
+  const arrancar = async () => {
+    // 1. Inicializar BD
+    await initDB().catch(e => console.error("Error DB:", e));
+
+    // 2. Pedir permisos (solo si el módulo está disponible en este entorno)
+    if (Notifications) {
+      try {
+        await Notifications.requestPermissionsAsync();
+      } catch (e) {
+        console.warn('No se pudieron pedir permisos de notificaciones:', e.message);
+      }
+    }
+
+    // 3. Verificar sesión guardada
+    const sesion = await sessionStore.obtener();
+    setSesionActiva(sesion || null); // null si no hay sesión
+
+    setDbReady(true);
+  };
+
+  // Pantalla de carga mientras arranca la app
+  if (!dbReady || sesionActiva === undefined) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
         <ActivityIndicator size="large" color="#2563EB" />
@@ -112,11 +153,27 @@ export default function App() {
     );
   }
 
+  // ─── FIX: screens declarados UNA SOLA VEZ con initialRouteName ───────────
+  // El error original era que InicioDeSesion y Main aparecían dentro del
+  // condicional Y también fuera, duplicando el nombre en el mismo navigator.
+  // Solución: todos los screens se declaran una vez; initialRouteName decide
+  // cuál mostrar primero según si hay sesión activa.
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="InicioDeSesion" component={InicioDeSesion} />
-        <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName={sesionActiva ? "Main" : "InicioDeSesion"}
+      >
+        <Stack.Screen
+          name="InicioDeSesion"
+          component={InicioDeSesion}
+        />
+        <Stack.Screen
+          name="Main"
+          component={MainTabs}
+          initialParams={sesionActiva ? { usuario: sesionActiva } : undefined}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -79,6 +79,29 @@ export const crearCita = async (datos) => {
   }
 };
 
+// ─── NUEVA: actualizar datos de una cita ────────────────────────────────────
+export const actualizarCita = async (id, datos) => {
+  try {
+    const db = await getDB();
+    await db.runAsync(
+      `UPDATE citas SET doctor=?, fecha=?, hora=?, motivo=?, notas=?, estado=? WHERE id=?`,
+      [
+        datos.doctor.trim(),
+        datos.fecha,
+        datos.hora,
+        datos.motivo || '',
+        datos.notas || '',
+        datos.estado || 'Pendiente',
+        id,
+      ]
+    );
+    return { success: true };
+  } catch (error) {
+    return { success: false, mensaje: error.message };
+  }
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 export const actualizarEstadoCita = async (id, estado) => {
   try {
     const db = await getDB();
