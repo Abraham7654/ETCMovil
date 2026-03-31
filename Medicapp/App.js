@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, LogBox } from "react-native"; // <-- LogBox añadido
+import { View, ActivityIndicator, LogBox } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+
 import { initDB } from "./database/Database";
 import { themeStore } from "./store/themeStore";
 import { sessionStore } from "./store/sessionStore";
@@ -24,30 +25,27 @@ import Perfil from "./screens/Perfil";
 import CambiarPassword from "./screens/CambiarPassword";
 import EditarCita from "./screens/EditarCita";
 
-// ─── SILENCIAR ADVERTENCIAS EN LA TERMINAL ──────────────────
 LogBox.ignoreLogs([
   'expo-notifications', 
   'SafeAreaView has been deprecated',
   'A navigator can only contain',
   'The action \'NAVIGATE\' with payload',
 ]);
-// ───────────────────────────────────────────────────────────
 
-// ─── Notificaciones compatibles con SDK 53 ──────────────────
 let Notifications = null;
 try {
   Notifications = require('expo-notifications');
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldShowAlert: true,   // Compatibilidad
-      shouldShowBanner: true,  // Nuevo SDK 53
-      shouldShowList: true,    // Nuevo SDK 53
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: false, 
     }),
   });
 } catch (e) {
-  console.warn('expo-notifications no disponible:', e.message);
+  console.warn('Notifications not available:', e.message);
 }
 
 const Stack = createNativeStackNavigator();
@@ -141,7 +139,7 @@ export default function App() {
       try {
         await Notifications.requestPermissionsAsync();
       } catch (e) {
-        // Silenciado para que no ensucie la terminal
+        // Error silenciado para producción
       }
     }
 

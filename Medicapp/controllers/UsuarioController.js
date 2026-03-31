@@ -1,6 +1,5 @@
 import { getDB } from '../database/Database';
 
-// LOGIN
 export const login = async (email, password) => {
   try {
     const db = await getDB();
@@ -15,7 +14,6 @@ export const login = async (email, password) => {
   }
 };
 
-// OBTENER PERFIL POR ID
 export const getPerfil = async (id) => {
   try {
     const db = await getDB();
@@ -28,7 +26,6 @@ export const getPerfil = async (id) => {
   }
 };
 
-// ACTUALIZAR PERFIL
 export const actualizarPerfil = async (id, datos) => {
   try {
     const db = await getDB();
@@ -44,7 +41,6 @@ export const actualizarPerfil = async (id, datos) => {
   }
 };
 
-// CAMBIAR CONTRASEÑA (Desde Ajustes)
 export const cambiarPassword = async (id, passwordActual, passwordNueva) => {
   try {
     if (!passwordNueva || passwordNueva.length < 6) {
@@ -62,9 +58,6 @@ export const cambiarPassword = async (id, passwordActual, passwordNueva) => {
   }
 };
 
-// --- NUEVAS FUNCIONES DE RECUPERACIÓN ---
-
-// 1. Generar Clave Temporal
 export const generarClaveTemporal = async (email) => {
   try {
     const db = await getDB();
@@ -73,10 +66,8 @@ export const generarClaveTemporal = async (email) => {
     
     if (!user) return { success: false, mensaje: 'El correo no está registrado' };
 
-    // Generar 6 dígitos aleatorios
     const claveTemporal = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Guardamos la temporal como contraseña actual
     await db.runAsync('UPDATE usuarios SET password=? WHERE email=?', [claveTemporal, cleanEmail]);
     
     return { success: true, claveTemporal }; 
@@ -85,13 +76,11 @@ export const generarClaveTemporal = async (email) => {
   }
 };
 
-// 2. Validar temporal y poner la nueva
 export const completarRecuperacion = async (email, claveTemporal, passwordNueva) => {
   try {
     const db = await getDB();
     const cleanEmail = email.trim().toLowerCase();
 
-    // Verificar que la clave temporal coincida
     const user = await db.getFirstAsync(
       'SELECT id FROM usuarios WHERE email = ? AND password = ?', 
       [cleanEmail, claveTemporal]

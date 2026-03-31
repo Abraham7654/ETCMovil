@@ -1,5 +1,3 @@
-// models/Paciente.js
-
 export const PacienteSchema = {
   tabla: 'pacientes',
   campos: {
@@ -31,7 +29,7 @@ export const crearPacienteObj = (datos = {}) => ({
   created_at: datos.created_at || new Date().toISOString(),
 });
 
-// Helper para obtener las iniciales del nombre
+
 export const getInitials = (nombre = '') => {
   return nombre
     .split(' ')

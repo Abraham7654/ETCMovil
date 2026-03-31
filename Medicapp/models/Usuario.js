@@ -1,6 +1,3 @@
-// models/Usuario.js
-// Define la estructura del modelo Usuario
-
 export const UsuarioSchema = {
   tabla: 'usuarios',
   campos: {

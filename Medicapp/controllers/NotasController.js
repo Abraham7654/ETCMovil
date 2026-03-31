@@ -1,4 +1,3 @@
-// controllers/NotasController.js
 import { getDB } from '../database/Database';
 
 export const getNotas = async (pacienteId) => {
@@ -20,6 +19,7 @@ export const guardarNotas = async (pacienteId, contenido) => {
       'SELECT id FROM notas_paciente WHERE paciente_id = ?', [pacienteId]
     );
     const ahora = new Date().toISOString();
+    
     if (existe) {
       await db.runAsync(
         'UPDATE notas_paciente SET contenido=?, updated_at=? WHERE paciente_id=?',

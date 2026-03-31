@@ -1,9 +1,3 @@
-// controllers/NotificacionesController.js
-// Compatible con Expo Go SDK 53:
-// - Las notificaciones LOCALES siguen funcionando si el dispositivo lo permite
-// - Si falla (Expo Go en algunos dispositivos), se muestra un Alert visual
-//   que demuestra la funcionalidad ante el profesor
-
 let Notifications = null;
 let notifDisponible = false;
 
@@ -14,9 +8,7 @@ try {
   notifDisponible = false;
 }
 
-// ─── Programar recordatorio de cita ─────────────────────────────────────────
 export const programarRecordatorioCita = async (cita, minutosAntes = 30) => {
-  // Calcular tiempos
   const [anio, mes, dia] = cita.fecha.split('-').map(Number);
   const [horas, minutos] = cita.hora.split(':').map(Number);
   const fechaCita = new Date(anio, mes - 1, dia, horas, minutos, 0);
@@ -26,7 +18,6 @@ export const programarRecordatorioCita = async (cita, minutosAntes = 30) => {
     return { success: false, mensaje: 'La fecha de la cita ya pasó' };
   }
 
-  // Intentar notificación real primero
   if (notifDisponible) {
     try {
       const { status } = await Notifications.getPermissionsAsync();
@@ -50,13 +41,10 @@ export const programarRecordatorioCita = async (cita, minutosAntes = 30) => {
         return { success: true, notifId: id, tipo: 'real' };
       }
     } catch (e) {
-      // Si falla la notificación real, caemos al fallback visual
       console.warn('Notificación real falló, usando fallback:', e.message);
     }
   }
 
-  // Fallback: guardar en memoria y retornar éxito
-  // El componente RecordatorioDeCita mostrará el Alert de confirmación
   return {
     success: true,
     notifId: `local_${cita.id}_${minutosAntes}`,
@@ -65,7 +53,6 @@ export const programarRecordatorioCita = async (cita, minutosAntes = 30) => {
   };
 };
 
-// ─── Notificación inmediata ──────────────────────────────────────────────────
 export const notificacionInmediata = async (titulo, cuerpo) => {
   if (notifDisponible) {
     try {
@@ -75,18 +62,16 @@ export const notificacionInmediata = async (titulo, cuerpo) => {
           body: cuerpo,
           sound: true,
         },
-        trigger: null, // inmediata
+        trigger: null,
       });
       return { success: true, tipo: 'real' };
     } catch (e) {
       console.warn('notificacionInmediata falló:', e.message);
     }
   }
-  // Fallback silencioso — el caller ya muestra el Alert
   return { success: true, tipo: 'fallback' };
 };
 
-// ─── Cancelar notificación por ID ───────────────────────────────────────────
 export const cancelarNotificacion = async (notifId) => {
   if (!notifDisponible || !notifId || notifId.toString().startsWith('local_')) {
     return { success: true };
@@ -99,7 +84,6 @@ export const cancelarNotificacion = async (notifId) => {
   }
 };
 
-// ─── Cancelar todas ─────────────────────────────────────────────────────────
 export const cancelarTodasNotificaciones = async () => {
   if (!notifDisponible) return;
   try {

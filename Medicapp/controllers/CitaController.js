@@ -1,4 +1,3 @@
-// controllers/CitaController.js
 import { getDB } from '../database/Database';
 import { getFechaHoy, getFechaManana, getFechaFinSemana } from '../models/Cita';
 
@@ -79,7 +78,6 @@ export const crearCita = async (datos) => {
   }
 };
 
-// ─── NUEVA: actualizar datos de una cita ────────────────────────────────────
 export const actualizarCita = async (id, datos) => {
   try {
     const db = await getDB();
@@ -100,7 +98,6 @@ export const actualizarCita = async (id, datos) => {
     return { success: false, mensaje: error.message };
   }
 };
-// ────────────────────────────────────────────────────────────────────────────
 
 export const actualizarEstadoCita = async (id, estado) => {
   try {

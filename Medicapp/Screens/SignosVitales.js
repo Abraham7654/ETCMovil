@@ -9,146 +9,248 @@ import { useTheme } from '../store/useTheme';
 import { guardarSignosVitales } from '../controllers/SignosVitalesController';
 
 export default function SignosVitales({ navigation, route }) {
-  const { t } = useTheme();
+  const { t, darkMode } = useTheme();
   const paciente = route?.params?.paciente;
+  
+  // Estados para los signos vitales
   const [peso, setPeso] = useState('');
   const [presion, setPresion] = useState('');
   const [frecuencia, setFrecuencia] = useState('');
   const [temperatura, setTemperatura] = useState('');
+  const [oxigenacion, setOxigenacion] = useState(''); // Campo extra común
   const [notas, setNotas] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleGuardar = async () => {
-    if (!paciente?.id) { Alert.alert('Error', 'No se identifico al paciente'); return; }
+    if (!paciente?.id) { Alert.alert('Error', 'No se identificó al paciente'); return; }
     if (!peso && !presion && !frecuencia && !temperatura) {
-      Alert.alert('Error', 'Ingresa al menos un signo vital'); return;
+      Alert.alert('Atención', 'Por favor, ingresa al menos un signo vital para el registro.'); 
+      return;
     }
+
     setLoading(true);
     const result = await guardarSignosVitales({
       paciente_id: paciente.id,
       fecha: new Date().toISOString(),
-      peso, presion, frecuencia_cardiaca: frecuencia,
-      temperatura, notas,
+      peso, 
+      presion, 
+      frecuencia_cardiaca: frecuencia,
+      temperatura, 
+      oxigenacion,
+      notas,
     });
     setLoading(false);
+
     if (result.success) {
-      Alert.alert('Exito', 'Signos vitales guardados correctamente', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+      Alert.alert('✅ Registrado', 'Los signos vitales se guardaron en el expediente.', [
+        { text: 'Finalizar', onPress: () => navigation.goBack() },
       ]);
     } else {
-      Alert.alert('Error', result.mensaje || 'No se pudieron guardar');
+      Alert.alert('Error', result.mensaje || 'Hubo un problema al guardar los datos.');
     }
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
       <StatusBar barStyle={t.statusBar} />
+      
+      {/* Header Personalizado */}
       <View style={[styles.header, { borderBottomColor: t.separator }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={t.text} />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.headerIconBtn, { backgroundColor: t.bg3 }]}>
+          <Ionicons name="chevron-back" size={22} color={t.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: t.text }]}>Signos Vitales</Text>
+        <Text style={[styles.headerTitle, { color: t.text }]}>Nuevo Registro</Text>
         <View style={{ width: 40 }} />
       </View>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scroll} 
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header del Paciente */}
           {paciente && (
-            <View style={[styles.patientRow, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-              <View style={[styles.patientAvatar, { backgroundColor: t.bg3 }]}>
-                <Ionicons name="person" size={20} color={t.textMuted} />
+            <View style={[styles.pacienteCard, { backgroundColor: t.primary }]}>
+              <View style={styles.pacienteInfo}>
+                <Text style={styles.pacienteLabel}>PACIENTE SELECCIONADO</Text>
+                <Text style={styles.pacienteNameText}>{paciente.nombre}</Text>
+                <Text style={styles.pacienteMetaText}>ID: {paciente.id} • {paciente.edad} años</Text>
               </View>
-              <View>
-                <Text style={[styles.patientName, { color: t.text }]}>{paciente.nombre}</Text>
-                <Text style={[styles.patientMeta, { color: t.textSub }]}>ID: {paciente.id} - {paciente.edad} anos</Text>
-              </View>
+              <Ionicons name="medical" size={40} color="rgba(255,255,255,0.2)" />
             </View>
           )}
-          <View style={[styles.dateCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-            <View style={styles.dateLeft}>
-              <View style={[styles.calendarIconBox, { backgroundColor: t.bg3 }]}>
-                <Ionicons name="calendar-outline" size={18} color={t.primary} />
-              </View>
-              <View>
-                <Text style={[styles.dateLabel, { color: t.textMuted }]}>Fecha del registro</Text>
-                <Text style={[styles.dateValue, { color: t.text }]}>{new Date().toLocaleDateString('es-MX')}</Text>
-              </View>
-            </View>
+
+          <Text style={[styles.sectionTitle, { color: t.textSub }]}>SIGNOS VITALES</Text>
+
+          {/* Grid de Signos Vitales */}
+          <View style={styles.vitalsGrid}>
+            <VitalInputCard 
+              label="Peso" unit="kg" value={peso} onChangeText={setPeso} 
+              icon="scale-outline" color="#10B981" placeholder="0.0" t={t} 
+            />
+            <VitalInputCard 
+              label="Temperatura" unit="°C" value={temperatura} onChangeText={setTemperatura} 
+              icon="thermometer-outline" color="#F59E0B" placeholder="36.5" t={t} 
+            />
+            <VitalInputCard 
+              label="P. Arterial" unit="mmHg" value={presion} onChangeText={setPresion} 
+              icon="heart-outline" color="#EF4444" placeholder="120/80" t={t} 
+            />
+            <VitalInputCard 
+              label="F. Cardíaca" unit="bpm" value={frecuencia} onChangeText={setFrecuencia} 
+              icon="pulse-outline" color="#2563EB" placeholder="72" t={t} 
+            />
+            <VitalInputCard 
+              label="Saturación" unit="SpO2" value={oxigenacion} onChangeText={setOxigenacion} 
+              icon="water-outline" color="#06B6D4" placeholder="98%" t={t} 
+            />
           </View>
-          <VitalCard label="Peso" unit="kg" value={peso} onChangeText={setPeso} iconBg="#D1FAE5" iconColor="#10B981" icon="scale-outline" placeholder="00.0" t={t} />
-          <VitalCard label="Presion Arterial" unit="mmHg" value={presion} onChangeText={setPresion} iconBg="#FEE2E2" iconColor="#EF4444" icon="heart-outline" placeholder="120/80" t={t} />
-          <VitalCard label="Frecuencia Cardiaca" unit="bpm" value={frecuencia} onChangeText={setFrecuencia} iconBg="#DBEAFE" iconColor="#2563EB" icon="pulse-outline" placeholder="72" t={t} />
-          <VitalCard label="Temperatura" unit="C" value={temperatura} onChangeText={setTemperatura} iconBg="#FEF3C7" iconColor="#F59E0B" icon="thermometer-outline" placeholder="36.5" t={t} />
+
+          {/* Sección de Notas */}
           <View style={styles.notesSection}>
-            <View style={styles.notesHeader}>
-              <Ionicons name="document-text-outline" size={18} color={t.textSub} style={{ marginRight: 8 }} />
-              <Text style={[styles.notesTitle, { color: t.text }]}>Observaciones</Text>
-            </View>
+            <Text style={[styles.sectionTitle, { color: t.textSub }]}>OBSERVACIONES ADICIONALES</Text>
             <TextInput
-              style={[styles.notesInput, { backgroundColor: t.card, borderColor: t.cardBorder, color: t.text }]}
-              placeholder="Observacion relevante..." placeholderTextColor={t.textMuted}
-              value={notas} onChangeText={setNotas} multiline textAlignVertical="top"
+              style={[styles.notesInput, { 
+                backgroundColor: t.card, 
+                borderColor: t.cardBorder, 
+                color: t.text 
+              }]}
+              placeholder="Escribe hallazgos clínicos relevantes..." 
+              placeholderTextColor={t.textMuted}
+              value={notas} 
+              onChangeText={setNotas} 
+              multiline 
+              textAlignVertical="top"
             />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <View style={[styles.footer, { backgroundColor: t.card, borderTopColor: t.cardBorder, paddingBottom: Platform.OS === 'ios' ? 34 : 16 }]}>
-        <TouchableOpacity style={[styles.draftBtn, { backgroundColor: t.bg3, borderColor: t.cardBorder }]} onPress={() => navigation.goBack()}>
-          <Text style={[styles.draftText, { color: t.text }]}>Cancelar</Text>
+
+      {/* Botones de Acción */}
+      <View style={[styles.footer, { 
+        backgroundColor: t.card, 
+        borderTopColor: t.cardBorder,
+        paddingBottom: Platform.OS === 'ios' ? 34 : 16 
+      }]}>
+        <TouchableOpacity 
+          style={[styles.btnSec, { borderColor: t.cardBorder }]} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={[styles.btnSecText, { color: t.text }]}>Descartar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.primary }]} onPress={handleGuardar} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Guardar Registro</Text>}
+
+        <TouchableOpacity 
+          style={[styles.btnPri, { backgroundColor: t.primary }]} 
+          onPress={handleGuardar} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="save-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.btnPriText}>Guardar Datos</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
-function VitalCard({ label, unit, value, onChangeText, iconBg, iconColor, icon, placeholder, t }) {
+/**
+ * Componente interno para las tarjetas de entrada
+ */
+function VitalInputCard({ label, unit, value, onChangeText, icon, color, placeholder, t }) {
   return (
-    <View style={[styles.vitalCard, { borderBottomColor: t.separator }]}>
-      <View style={styles.vitalInfo}>
-        <View style={[styles.vitalIcon, { backgroundColor: iconBg }]}><Ionicons name={icon} size={20} color={iconColor} /></View>
-        <View>
-          <Text style={[styles.vitalLabel, { color: t.text }]}>{label}</Text>
-          <Text style={[styles.vitalUnit, { color: t.textSub }]}>{unit}</Text>
+    <View style={[styles.vCard, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+      <View style={styles.vCardHeader}>
+        <View style={[styles.vIconBox, { backgroundColor: color + '15' }]}>
+          <Ionicons name={icon} size={18} color={color} />
         </View>
+        <Text style={[styles.vUnit, { color: t.textSub }]}>{unit}</Text>
       </View>
-      <View style={[styles.inputBox, { backgroundColor: t.bg3 }]}>
-        <TextInput style={[styles.vitalInput, { color: t.text }]} placeholder={placeholder} placeholderTextColor={t.textMuted} value={value} onChangeText={onChangeText} keyboardType="decimal-pad" />
-      </View>
+      <Text style={[styles.vLabel, { color: t.text }]}>{label}</Text>
+      <TextInput 
+        style={[styles.vInput, { color: t.text }]} 
+        placeholder={placeholder} 
+        placeholderTextColor={t.textMuted} 
+        value={value} 
+        onChangeText={onChangeText} 
+        keyboardType={label === 'P. Arterial' ? 'default' : 'decimal-pad'} 
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '700' },
-  scroll: { padding: 16, paddingBottom: 120 },
-  patientRow: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 12 },
-  patientAvatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  patientName: { fontSize: 16, fontWeight: '700' },
-  patientMeta: { fontSize: 13 },
-  dateCard: { flexDirection: 'row', alignItems: 'center', padding: 14, borderWidth: 1, borderRadius: 14, marginBottom: 20 },
-  dateLeft: { flexDirection: 'row', alignItems: 'center' },
-  calendarIconBox: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  dateLabel: { fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 },
-  dateValue: { fontSize: 14, fontWeight: '600' },
-  vitalCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, marginBottom: 8 },
-  vitalInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  vitalIcon: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  vitalLabel: { fontSize: 15, fontWeight: '700' },
-  vitalUnit: { fontSize: 12 },
-  inputBox: { width: 100, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8 },
-  vitalInput: { fontSize: 18, fontWeight: '600', textAlign: 'center' },
-  notesSection: { marginTop: 20 },
-  notesHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  notesTitle: { fontSize: 14, fontWeight: '700' },
-  notesInput: { fontSize: 14, borderRadius: 12, padding: 16, minHeight: 100, borderWidth: 1 },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', padding: 16, gap: 12, borderTopWidth: 1 },
-  draftBtn: { flex: 1, height: 54, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  draftText: { fontWeight: '600', fontSize: 15 },
-  saveBtn: { flex: 2, height: 54, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  saveText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingVertical: 12 
+  },
+  headerIconBtn: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '800' },
+  
+  scroll: { padding: 20, paddingBottom: 120 },
+  
+  pacienteCard: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 20, 
+    borderRadius: 24, 
+    marginBottom: 25,
+    justifyContent: 'space-between'
+  },
+  pacienteLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
+  pacienteNameText: { color: '#fff', fontSize: 20, fontWeight: '800' },
+  pacienteMetaText: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '500' },
+
+  sectionTitle: { fontSize: 12, fontWeight: '800', marginBottom: 15, letterSpacing: 1 },
+
+  vitalsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  
+  // Estilos Vital Card
+  vCard: { 
+    width: '48%', 
+    borderRadius: 20, 
+    borderWidth: 1, 
+    padding: 15, 
+    marginBottom: 15 
+  },
+  vCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
+  vIconBox: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  vUnit: { fontSize: 11, fontWeight: '700' },
+  vLabel: { fontSize: 13, fontWeight: '600', marginBottom: 4 },
+  vInput: { fontSize: 22, fontWeight: '800', padding: 0 },
+
+  notesSection: { marginTop: 10 },
+  notesInput: { 
+    fontSize: 15, 
+    borderRadius: 20, 
+    padding: 16, 
+    minHeight: 120, 
+    borderWidth: 1,
+    lineHeight: 22
+  },
+
+  footer: { 
+    position: 'absolute', 
+    bottom: 0, left: 0, right: 0, 
+    flexDirection: 'row', 
+    padding: 20, 
+    gap: 12, 
+    borderTopWidth: 1 
+  },
+  btnSec: { flex: 1, height: 56, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  btnSecText: { fontWeight: '700', fontSize: 15 },
+  btnPri: { flex: 2, height: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  btnPriText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });

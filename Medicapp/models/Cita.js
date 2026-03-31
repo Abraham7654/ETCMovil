@@ -1,5 +1,3 @@
-// models/Cita.js
-
 export const CitaSchema = {
   tabla: 'citas',
   campos: {
@@ -29,17 +27,17 @@ export const crearCitaObj = (datos = {}) => ({
   created_at: datos.created_at || new Date().toISOString(),
 });
 
-// Obtener fecha de hoy en formato YYYY-MM-DD
+
 export const getFechaHoy = () => new Date().toISOString().split('T')[0];
 
-// Obtener fecha de mañana
+
 export const getFechaManana = () => {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   return d.toISOString().split('T')[0];
 };
 
-// Obtener fecha límite para "esta semana"
+
 export const getFechaFinSemana = () => {
   const d = new Date();
   d.setDate(d.getDate() + 7);

@@ -77,7 +77,7 @@ export const initDB = async () => {
     );
   `);
 
-  // Usuario demo
+  
   const existeUser = await database.getFirstAsync(
     'SELECT id FROM usuarios WHERE email = ?', ['demo@clinica.com']
   );
@@ -90,7 +90,7 @@ export const initDB = async () => {
     );
   }
 
-  // Pacientes demo
+  
   const existePaciente = await database.getFirstAsync('SELECT id FROM pacientes LIMIT 1');
   if (!existePaciente) {
     const pacientesDemo = [
@@ -107,7 +107,7 @@ export const initDB = async () => {
       );
     }
 
-    // Citas demo
+    
     const hoy = new Date().toISOString().split('T')[0];
     const citasDemo = [
       [1, 'Dr. Martínez', hoy, '09:00', 'Consulta General', '', 'Confirmada', 1],
@@ -123,7 +123,6 @@ export const initDB = async () => {
       );
     }
 
-    // Signos vitales demo
     await database.runAsync(
       `INSERT INTO signos_vitales (paciente_id, fecha, peso, presion, frecuencia_cardiaca, temperatura, notas)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,

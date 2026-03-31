@@ -30,7 +30,6 @@ export default function Perfil({ navigation, route }) {
 
   const cargarPerfil = async () => {
     setLoading(true);
-    // Primero intentar desde params, luego desde sesión, luego desde BD
     const id = usuarioParam?.id || (await sessionStore.obtener())?.id;
     if (id) {
       const result = await getPerfil(id);
@@ -55,21 +54,20 @@ export default function Perfil({ navigation, route }) {
     });
     setSaving(false);
     if (result.success) {
-      // Actualizar sesión con nuevos datos
       await sessionStore.guardar(result.usuario);
       setUsuario(result.usuario);
       setEditando(false);
-      Alert.alert('✅ Guardado', 'Perfil actualizado correctamente');
+      Alert.alert('✅ Perfil Actualizado', 'Tus datos se han guardado correctamente.');
     } else {
       Alert.alert('Error', result.mensaje);
     }
   };
 
   const handleCerrarSesion = async () => {
-    Alert.alert('Cerrar Sesión', '¿Estás seguro de cerrar sesión?', [
+    Alert.alert('Cerrar Sesión', '¿Estás seguro de que deseas salir?', [
       { text: 'Cancelar', style: 'cancel' },
       {
-        text: 'Cerrar Sesión', style: 'destructive',
+        text: 'Salir', style: 'destructive',
         onPress: async () => {
           await sessionStore.eliminar();
           navigation.replace('InicioDeSesion');
@@ -80,223 +78,230 @@ export default function Perfil({ navigation, route }) {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: t.bg2 }]}>
-        <ActivityIndicator size="large" color="#2563EB" style={{ marginTop: 100 }} />
+      <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={t.primary} />
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: t.bg2 }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
       <StatusBar barStyle={t.statusBar} />
-      <View style={[styles.header, { backgroundColor: t.card, borderBottomColor: t.separator }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={t.text} />
+      
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.headerBtn, { backgroundColor: t.bg3 }]}>
+          <Ionicons name="chevron-back" size={22} color={t.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: t.text }]}>Mi Perfil</Text>
-        <TouchableOpacity style={styles.editBtn} onPress={() => {
-          if (editando) {
-            // Cancelar edición - restaurar datos originales
-            setNombre(usuario?.nombre || '');
-            setEspecialidad(usuario?.especialidad || '');
-            setColegio(usuario?.colegio || '');
-            setCentroTrabajo(usuario?.centro_trabajo || '');
-            setTelefono(usuario?.telefono || '');
-          }
-          setEditando(!editando);
-        }}>
-          <Ionicons name={editando ? 'close' : 'pencil'} size={20} color={t.primary} />
+        <Text style={[styles.headerTitle, { color: t.text }]}>Perfil Profesional</Text>
+        <TouchableOpacity 
+          style={[styles.headerBtn, { backgroundColor: editando ? t.primary + '20' : t.bg3 }]} 
+          onPress={() => {
+            if (editando) cargarPerfil(); // Reset si cancela
+            setEditando(!editando);
+          }}
+        >
+          <Ionicons name={editando ? 'close' : 'create-outline'} size={20} color={editando ? t.primary : t.text} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Avatar */}
-        <View style={styles.avatarSection}>
-          <View style={[styles.avatarCircle, { backgroundColor: t.bg3 }]}>
-            <Text style={[styles.avatarInitials, { color: t.primary }]}>
-              {(usuario?.nombre || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        
+        {/* Avatar Section */}
+        <View style={styles.profileHero}>
+          <View style={[styles.avatarContainer, { backgroundColor: t.primary }]}>
+            <Text style={styles.avatarInitial}>
+              {nombre.charAt(0).toUpperCase()}
             </Text>
-            <TouchableOpacity style={[styles.cameraBtn, { borderColor: t.bg2 }]}>
+            <TouchableOpacity style={[styles.cameraBadge, { borderColor: t.bg }]}>
               <Ionicons name="camera" size={14} color="#fff" />
             </TouchableOpacity>
           </View>
-          {editando ? (
-            <TextInput
-              style={[styles.nameInput, { color: t.text, borderBottomColor: t.primary }]}
-              value={nombre}
-              onChangeText={setNombre}
-              placeholder="Nombre completo"
-              placeholderTextColor={t.textMuted}
-            />
-          ) : (
-            <Text style={[styles.doctorName, { color: t.text }]}>{usuario?.nombre || 'Sin nombre'}</Text>
-          )}
-          <Text style={[styles.doctorRole, { color: t.textSub }]}>{usuario?.especialidad || 'Médico General'}</Text>
-          {editando && (
-            <View style={[styles.editingBadge, { backgroundColor: '#EFF6FF' }]}>
-              <Ionicons name="pencil" size={12} color="#2563EB" style={{ marginRight: 4 }} />
-              <Text style={styles.editingBadgeText}>Modo edición activo</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Info Personal */}
-        <View style={[styles.section, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-          <View style={[styles.sectionHeader, { borderBottomColor: t.separator }]}>
-            <View style={[styles.sectionIconBox, { backgroundColor: t.bg3 }]}>
-              <Ionicons name="person-outline" size={18} color="#2563EB" />
-            </View>
-            <Text style={[styles.sectionTitle, { color: t.text }]}>Información Personal</Text>
-          </View>
-          <InfoRow label="Email" value={usuario?.email || ''} editable={false} t={t} />
-          <View style={[styles.divider, { backgroundColor: t.separator }]} />
-          <InfoRow label="Teléfono" value={telefono} editable={editando}
-            onChangeText={setTelefono} t={t} last />
-        </View>
-
-        {/* Info Profesional */}
-        <View style={[styles.section, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-          <View style={[styles.sectionHeader, { borderBottomColor: t.separator }]}>
-            <View style={[styles.sectionIconBox, { backgroundColor: t.bg3 }]}>
-              <Ionicons name="medical-outline" size={18} color="#7C3AED" />
-            </View>
-            <Text style={[styles.sectionTitle, { color: t.text }]}>Información Profesional</Text>
-          </View>
-          <InfoRow label="Especialidad" value={especialidad} editable={editando}
-            onChangeText={setEspecialidad} placeholder="Ej: Medicina General" t={t} />
-          <View style={[styles.divider, { backgroundColor: t.separator }]} />
-          <InfoRow label="Colegio Médico" value={colegio} editable={editando}
-            onChangeText={setColegio} placeholder="Ej: CM-28-45678" t={t} />
-          <View style={[styles.divider, { backgroundColor: t.separator }]} />
-          <InfoRow label="Centro de Trabajo" value={centroTrabajo} editable={editando}
-            onChangeText={setCentroTrabajo} placeholder="Ej: Clínica San Rafael" t={t} last />
-        </View>
-
-        {/* Botón guardar si está editando */}
-        {editando && (
-          <TouchableOpacity
-            style={[styles.saveBtn, { backgroundColor: t.primary }]}
-            onPress={handleGuardar}
-            disabled={saving}
-          >
-            {saving ? <ActivityIndicator color="#fff" /> : (
-              <>
-                <Ionicons name="checkmark-circle-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
-                <Text style={styles.saveBtnText}>Guardar Cambios</Text>
-              </>
+          
+          <View style={styles.heroTextContainer}>
+            {editando ? (
+              <TextInput
+                style={[styles.inputNombre, { color: t.text, borderBottomColor: t.primary }]}
+                value={nombre}
+                onChangeText={setNombre}
+                autoFocus
+              />
+            ) : (
+              <Text style={[styles.heroName, { color: t.text }]}>{usuario?.nombre}</Text>
             )}
+            <Text style={[styles.heroSub, { color: t.textSub }]}>
+              {usuario?.especialidad || 'Especialidad no definida'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Formulario de Información */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: t.textSub }]}>DATOS DE CONTACTO</Text>
+          <View style={[styles.card, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+            <InfoField icon="mail-outline" label="Correo Electrónico" value={usuario?.email} t={t} />
+            <View style={[styles.divider, { backgroundColor: t.separator }]} />
+            <InfoField 
+              icon="call-outline" 
+              label="Teléfono" 
+              value={telefono} 
+              editable={editando} 
+              onChangeText={setTelefono} 
+              t={t} 
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: t.textSub }]}>CREDENCIALES MÉDICAS</Text>
+          <View style={[styles.card, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+            <InfoField 
+              icon="ribbon-outline" 
+              label="Especialidad" 
+              value={especialidad} 
+              editable={editando} 
+              onChangeText={setEspecialidad} 
+              t={t} 
+            />
+            <View style={[styles.divider, { backgroundColor: t.separator }]} />
+            <InfoField 
+              icon="card-outline" 
+              label="Cédula/Colegio" 
+              value={colegio} 
+              editable={editando} 
+              onChangeText={setColegio} 
+              t={t} 
+            />
+            <View style={[styles.divider, { backgroundColor: t.separator }]} />
+            <InfoField 
+              icon="business-outline" 
+              label="Centro Médico" 
+              value={centroTrabajo} 
+              editable={editando} 
+              onChangeText={setCentroTrabajo} 
+              t={t} 
+            />
+          </View>
+        </View>
+
+        {/* Configuración de Seguridad */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: t.textSub }]}>SEGURIDAD Y APP</Text>
+          <View style={[styles.card, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('CambiarPassword', { usuario })}>
+              <View style={[styles.rowIcon, { backgroundColor: '#F3F4F6' }]}>
+                <Ionicons name="lock-closed" size={18} color="#4B5563" />
+              </View>
+              <Text style={[styles.rowText, { color: t.text }]}>Actualizar Contraseña</Text>
+              <Ionicons name="chevron-forward" size={18} color={t.textMuted} />
+            </TouchableOpacity>
+            
+            <View style={[styles.divider, { backgroundColor: t.separator }]} />
+            
+            <View style={styles.rowItem}>
+              <View style={[styles.rowIcon, { backgroundColor: '#E0F2FE' }]}>
+                <Ionicons name="finger-print" size={18} color="#0284C7" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.rowText, { color: t.text }]}>Biometría / 2FA</Text>
+                <Text style={{ fontSize: 11, color: t.textSub }}>Acceso seguro reforzado</Text>
+              </View>
+              <Switch value={twoFactor} onValueChange={setTwoFactor} trackColor={{ false: '#D1D5DB', true: t.primary }} />
+            </View>
+          </View>
+        </View>
+
+        {/* Botones de Acción */}
+        {editando ? (
+          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.primary }]} onPress={handleGuardar} disabled={saving}>
+            {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Guardar Perfil</Text>}
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={[styles.logoutBtn, { borderColor: '#EF4444' }]} onPress={handleCerrarSesion}>
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+            <Text style={styles.logoutText}>Cerrar Sesión</Text>
           </TouchableOpacity>
         )}
 
-        {/* Seguridad */}
-        <View style={[styles.section, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-          <View style={[styles.sectionHeader, { borderBottomColor: t.separator }]}>
-            <View style={[styles.sectionIconBox, { backgroundColor: darkMode ? '#1E3A5F' : '#EFF6FF' }]}>
-              <Ionicons name="shield-outline" size={18} color="#2563EB" />
-            </View>
-            <Text style={[styles.sectionTitle, { color: t.text }]}>Seguridad</Text>
-          </View>
-          <TouchableOpacity style={styles.row}
-            onPress={() => navigation.navigate('CambiarPassword', { usuario })}>
-            <Ionicons name="lock-closed-outline" size={18} color={t.textMuted} style={{ marginRight: 12 }} />
-            <Text style={[styles.rowLabel, { color: t.text }]}>Cambiar Contraseña</Text>
-            <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
-          </TouchableOpacity>
-          <View style={[styles.divider, { backgroundColor: t.separator }]} />
-          <View style={styles.row}>
-            <Ionicons name="finger-print-outline" size={18} color={t.textMuted} style={{ marginRight: 12 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.rowLabel, { color: t.text }]}>Autenticación en Dos Pasos</Text>
-              <Text style={[styles.rowSub, twoFactor && { color: t.success }]}>
-                {twoFactor ? 'Activada' : 'Desactivada'}
-              </Text>
-            </View>
-            <Switch value={twoFactor} onValueChange={setTwoFactor}
-              trackColor={{ false: '#E5E7EB', true: t.success }} ios_backgroundColor="#E5E7EB" />
-          </View>
-        </View>
-
-        {/* App */}
-        <View style={[styles.section, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
-          <View style={[styles.sectionHeader, { borderBottomColor: t.separator }]}>
-            <View style={[styles.sectionIconBox, { backgroundColor: t.bg3 }]}>
-              <Ionicons name="settings-outline" size={18} color={t.textSub} />
-            </View>
-            <Text style={[styles.sectionTitle, { color: t.text }]}>Configuración de App</Text>
-          </View>
-          {['Notificaciones', 'Privacidad', 'Ayuda y Soporte'].map((item, i, arr) => (
-            <React.Fragment key={item}>
-              <TouchableOpacity style={styles.row}>
-                <Text style={[styles.rowLabel, { color: t.text }]}>{item}</Text>
-                <Ionicons name="chevron-forward" size={16} color={t.textMuted} />
-              </TouchableOpacity>
-              {i < arr.length - 1 && <View style={[styles.divider, { backgroundColor: t.separator }]} />}
-            </React.Fragment>
-          ))}
-        </View>
-
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleCerrarSesion}>
-          <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutText}>Cerrar Sesión</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function InfoRow({ label, value, editable, onChangeText, placeholder, last, t }) {
-  return (
-    <View>
-      <View style={styles.row}>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.rowSublabel, { color: t.textMuted }]}>{label}</Text>
-          {editable ? (
-            <TextInput
-              style={[styles.rowInput, { color: t.text, borderBottomColor: t.separator }]}
-              value={value}
-              onChangeText={onChangeText}
-              placeholder={placeholder || label}
-              placeholderTextColor={t.textMuted}
-            />
-          ) : (
-            <Text style={[styles.rowLabel, { color: t.text }]}>{value || 'No registrado'}</Text>
-          )}
-        </View>
-        {!editable && <Ionicons name="chevron-forward" size={16} color={t.textMuted} />}
-      </View>
-      {!last && <View style={[{ height: 1, backgroundColor: t?.separator || '#F3F4F6', marginLeft: 14 }]} />}
+// Subcomponente para filas de información
+const InfoField = ({ icon, label, value, editable, onChangeText, t }) => (
+  <View style={styles.infoField}>
+    <Ionicons name={icon} size={20} color={t.primary} style={styles.fieldIcon} />
+    <View style={{ flex: 1 }}>
+      <Text style={[styles.fieldLabel, { color: t.textMuted }]}>{label}</Text>
+      {editable ? (
+        <TextInput
+          style={[styles.fieldInput, { color: t.text, borderBottomColor: t.primary + '40' }]}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={`Escribir ${label.toLowerCase()}`}
+        />
+      ) : (
+        <Text style={[styles.fieldValue, { color: t.text }]}>{value || 'No especificado'}</Text>
+      )}
     </View>
-  );
-}
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '700' },
-  editBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  scroll: { paddingHorizontal: 16, paddingBottom: 40 },
-  avatarSection: { alignItems: 'center', paddingVertical: 24 },
-  avatarCircle: { width: 90, height: 90, borderRadius: 45, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  avatarInitials: { fontSize: 32, fontWeight: '800' },
-  cameraBtn: { position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: '#2563EB', alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
-  nameInput: { fontSize: 20, fontWeight: '700', borderBottomWidth: 2, paddingBottom: 4, minWidth: 200, textAlign: 'center' },
-  doctorName: { fontSize: 20, fontWeight: '700' },
-  doctorRole: { fontSize: 14, marginTop: 2 },
-  editingBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginTop: 8 },
-  editingBadgeText: { fontSize: 11, color: '#2563EB', fontWeight: '600' },
-  section: { borderRadius: 14, marginBottom: 14, borderWidth: 1, overflow: 'hidden' },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
-  sectionIconBox: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginRight: 10 },
-  sectionTitle: { fontSize: 15, fontWeight: '700' },
-  row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12 },
-  rowSublabel: { fontSize: 11, marginBottom: 2 },
-  rowLabel: { fontSize: 14, fontWeight: '600' },
-  rowSub: { fontSize: 12, marginTop: 2 },
-  rowInput: { fontSize: 14, fontWeight: '600', borderBottomWidth: 1, paddingBottom: 2 },
-  divider: { height: 1, marginLeft: 14 },
-  saveBtn: { height: 52, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  logoutBtn: { height: 52, backgroundColor: '#EF4444', borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  logoutText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingVertical: 15 
+  },
+  headerBtn: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '800' },
+  
+  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
+  
+  profileHero: { alignItems: 'center', marginVertical: 25 },
+  avatarContainer: { width: 100, height: 100, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 15 },
+  avatarInitial: { fontSize: 42, fontWeight: '800', color: '#fff' },
+  cameraBadge: { 
+    position: 'absolute', bottom: -5, right: -5, 
+    width: 32, height: 32, borderRadius: 12, 
+    backgroundColor: '#374151', borderWidth: 3, 
+    alignItems: 'center', justifyContent: 'center' 
+  },
+  heroTextContainer: { alignItems: 'center' },
+  heroName: { fontSize: 22, fontWeight: '800' },
+  heroSub: { fontSize: 14, fontWeight: '500', marginTop: 4 },
+  inputNombre: { fontSize: 22, fontWeight: '800', textAlign: 'center', borderBottomWidth: 2, minWidth: 200 },
+
+  section: { marginBottom: 25 },
+  sectionLabel: { fontSize: 12, fontWeight: '800', marginBottom: 10, marginLeft: 5, letterSpacing: 1 },
+  card: { borderRadius: 20, borderWidth: 1, padding: 5, overflow: 'hidden' },
+  
+  infoField: { flexDirection: 'row', alignItems: 'center', padding: 15 },
+  fieldIcon: { marginRight: 15 },
+  fieldLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', marginBottom: 2 },
+  fieldValue: { fontSize: 15, fontWeight: '600' },
+  fieldInput: { fontSize: 15, fontWeight: '600', paddingVertical: 2, borderBottomWidth: 1 },
+  
+  divider: { height: 1, marginHorizontal: 15 },
+
+  rowItem: { flexDirection: 'row', alignItems: 'center', padding: 15 },
+  rowIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
+  rowText: { flex: 1, fontSize: 15, fontWeight: '600' },
+
+  saveBtn: { height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginTop: 10, elevation: 4 },
+  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  
+  logoutBtn: { 
+    height: 56, borderRadius: 18, borderWidth: 2, 
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', 
+    marginTop: 10, gap: 10 
+  },
+  logoutText: { color: '#EF4444', fontSize: 16, fontWeight: '800' },
 });

@@ -1,5 +1,3 @@
-// models/SignosVitales.js
-
 export const SignosVitalesSchema = {
   tabla: 'signos_vitales',
   campos: {

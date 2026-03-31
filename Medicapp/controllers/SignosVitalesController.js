@@ -1,4 +1,3 @@
-// controllers/SignosVitalesController.js
 import { getDB } from '../database/Database';
 
 export const getSignosVitales = async (pacienteId) => {
@@ -31,8 +30,8 @@ export const guardarSignosVitales = async (datos) => {
   try {
     const db = await getDB();
     const result = await db.runAsync(
-      `INSERT INTO signos_vitales
-       (paciente_id, fecha, peso, presion, frecuencia_cardiaca, temperatura, notas)
+      `INSERT INTO signos_vitales 
+       (paciente_id, fecha, peso, presion, frecuencia_cardiaca, temperatura, notas) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         datos.paciente_id,

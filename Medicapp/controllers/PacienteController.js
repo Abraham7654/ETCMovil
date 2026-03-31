@@ -1,4 +1,3 @@
-// controllers/PacienteController.js
 import { getDB } from '../database/Database';
 
 export const getPacientes = async () => {
@@ -71,9 +70,16 @@ export const actualizarPaciente = async (id, datos) => {
        contacto_emergencia=?, tipo_sangre=?, alergias=?, notas_medicas=?, estado=?
        WHERE id=?`,
       [
-        datos.nombre, parseInt(datos.edad) || 0, datos.genero,
-        datos.telefono, datos.contacto_emergencia, datos.tipo_sangre,
-        datos.alergias, datos.notas_medicas, datos.estado, id,
+        datos.nombre,
+        parseInt(datos.edad) || 0,
+        datos.genero,
+        datos.telefono,
+        datos.contacto_emergencia,
+        datos.tipo_sangre,
+        datos.alergias,
+        datos.notas_medicas,
+        datos.estado,
+        id,
       ]
     );
     return { success: true };
