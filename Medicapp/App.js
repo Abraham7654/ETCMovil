@@ -22,7 +22,7 @@ import RecordatorioDeCita from "./screens/RecordatorioDeCita";
 import Ajustes from "./screens/Ajustes";
 import Perfil from "./screens/Perfil";
 import CambiarPassword from "./screens/CambiarPassword";
-
+import EditarCita from "./screens/EditarCita";
 // ─── Notificaciones: compatibles con Expo Go SDK 53 ────────────────────────
 // Las notificaciones remotas fueron removidas de Expo Go en SDK 53.
 // Las locales (scheduleNotificationAsync) siguen funcionando con este wrapper.
@@ -63,6 +63,7 @@ function CitasStack() {
       <Stack.Screen name="ListaDeCitas" component={ListaDeCitas} />
       <Stack.Screen name="CrearCita" component={CrearCita} />
       <Stack.Screen name="RecordatorioDeCita" component={RecordatorioDeCita} />
+      <Stack.Screen name="EditarCita" component={EditarCita} />  {/* ← agregar */}
     </Stack.Navigator>
   );
 }
