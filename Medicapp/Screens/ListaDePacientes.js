@@ -126,7 +126,7 @@ export default function ListaDePacientes({ navigation }) {
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => (
+          ListEmptyComponent={() => ( 
             <View style={styles.emptyContainer}>
               <View style={[styles.emptyIconBox, { backgroundColor: t.bg3 }]}>
                 <Ionicons name="people-outline" size={40} color={t.textMuted} />
